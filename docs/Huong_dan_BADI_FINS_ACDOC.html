@@ -219,8 +219,12 @@
       <a href="#disable">2. Disable</a>
       <a href="#xoa">3. Xóa</a>
       <a href="#debug">4. Debug</a>
-      <a href="#checklist">5. Checklist</a>
+      <a href="#checklist">6. Checklist</a>
+      <a href="#tim-enhance" class="sub">Tìm điểm enhance</a>
+      <a href="#loi" class="sub">Lỗi thường gặp</a>
+      <a href="#luu-y" class="sub">Lưu ý &amp; ảnh hưởng</a>
       <a href="#nguon">Nguồn tham khảo</a>
+      <a href="sources/README.md">Mirror nguồn SAP</a>
       <a href="#ghi-chu">Ghi chú</a>
     </nav>
 
@@ -440,6 +444,33 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
         </ul>
       </section>
 
+      <section id="tim-enhance">
+        <h2>7. Cách tìm điểm để enhance</h2>
+        <p><code class="inline">SE19</code> → <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code> / <code class="inline">ES_FINS_ACDOCA</code> · <code class="inline">SE84</code>/<code class="inline">SE80</code> → Enhancements · Ngược từ BCF: <code class="inline">FAGLGVTR</code> → tìm <code class="inline">GET BADI</code>.</p>
+        <p>Chi tiết: <a href="Huong_dan_BADI_FINS_ACDOC.md">Markdown §7</a> · <a href="../wiki/Tim-diem-enhance.md">Wiki</a></p>
+      </section>
+
+      <section id="loi">
+        <h2>8. Lỗi thường gặp</h2>
+        <table>
+          <tr><th>Triệu chứng</th><th>Xử lý nhanh</th></tr>
+          <tr><td>Field trống sau BCF</td><td><code class="inline">FINSC_ACDOC_FCT</code> + BAdI <code class="inline">CHANGE_ACTIVE_FIELDS_BCF_*</code> — <a href="sources/sap-kba/KBA-3588343.md">KBA 3588343</a></td></tr>
+          <tr><td><code class="inline">CX_BADI_NOT_IMPLEMENTED</code></td><td>Activate ZBI / fallback — <a href="sources/sap-abap-cloud/3008-ABAPGET_BADI.md">GET BADI</a></td></tr>
+          <tr><td>Breakpoint không dừng</td><td>Debug <code class="inline">ZCL_*</code>, đúng user, SM37+JDBG</td></tr>
+        </table>
+        <p><a href="../wiki/Loi-thuong-gap.md">Wiki — bảng đầy đủ</a></p>
+      </section>
+
+      <section id="luu-y">
+        <h2>9–10. Lưu ý &amp; ảnh hưởng</h2>
+        <ul>
+          <li>SE24 signature trước khi code; activate + transport đủ chain.</li>
+          <li>Disable = inactive BAdI implementation (SE19).</li>
+          <li>Ảnh hưởng: BCF, opening balance ACDOCA, OI accounts (<code class="inline">BCF_OI</code>).</li>
+        </ul>
+        <p><a href="../wiki/Luu-y-va-anh-huong.md">Wiki</a> · <a href="sources/finance/FINSC_ACDOC_FCT.md">FINSC_ACDOC_FCT</a> · <a href="sources/sap-community/balance-carryforward-custom-fields.md">Community BCF</a></p>
+      </section>
+
       <section id="nguon" class="refs">
         <h2>Nguồn tham khảo</h2>
         <dl>
@@ -460,6 +491,15 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
 
           <dt id="s6">[S6] BAdI implementation class</dt>
           <dd><a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html" target="_blank" rel="noopener">ABENBADI_IMPLEMENT_CLASS_GLOSRY — SAP Help</a></dd>
+
+          <dt id="s7">[S7] SAP KBA 3588343</dt>
+          <dd><a href="https://userapps.support.sap.com/sap/support/knowledge/en/3588343" target="_blank" rel="noopener">SAP Support</a> — <a href="sources/sap-kba/KBA-3588343.md">mirror repo</a></dd>
+
+          <dt id="s8">[S8] SAP Community — BCF custom fields</dt>
+          <dd><a href="https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529" target="_blank" rel="noopener">Community</a> — <a href="sources/sap-community/balance-carryforward-custom-fields.md">mirror repo</a></dd>
+
+          <dt>Mirror ABAP Cloud</dt>
+          <dd><a href="sources/README.md">docs/sources/</a> (9 trang ABAP + KBA + Finance)</dd>
         </dl>
       </section>
 

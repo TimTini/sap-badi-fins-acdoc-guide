@@ -401,6 +401,93 @@ SM37
 
 ---
 
+## 7. Cách tìm điểm để enhance
+
+### 7.1 Từ BAdI / Enhancement Spot đã biết (case Finance)
+
+| Bước | Transaction | Việc làm |
+|------|-------------|----------|
+| 1 | `SE19` | Tìm BAdI `BADI_FINS_ACDOC_FIELDCAT` hoặc Enhancement Spot `ES_FINS_ACDOCA` |
+| 2 | `SE24` | Mở `IF_BADI_FINS_ACDOC_FIELDCAT` → xem method / parameter |
+| 3 | Where-used | Trên BAdI definition hoặc interface → xem chương trình standard gọi BAdI |
+
+### 7.2 Tìm Enhancement Spot / BAdI từ nghiệp vụ
+
+| Bước | Transaction | Việc làm |
+|------|-------------|----------|
+| 1 | `SE84` / `SE80` | Repository Browser → **Enhancements** → Enhancement Spots / BAdI Definitions |
+| 2 | `SE18` | Enhancement Spot Builder — duyệt spot theo component/package FI-GL (nếu có quyền) |
+| 3 | Search | Tìm theo từ khóa: `ACDOC`, `FINS`, `BCF`, `CARRY` trong mô tả spot/BAdI |
+
+### 7.3 Tìm từ chương trình nghiệp vụ (where-used ngược)
+
+1. Xác định chương trình BCF: `FAGLGVTR` hoặc app **Carry Forward Balances**.
+2. `SE38` / `SE37` → program/class liên quan → **Find** → **Enhancement options** / search `GET BADI` / `CALL BADI`.
+3. Kết quả cho biết **enhancement spot** và **BAdI** được gọi tại runtime.
+
+### 7.4 Khái niệm (SAP)
+
+- **Enhancement spot** — quản trị explicit enhancement options (BAdI + điểm gọi). [[S3]](#nguon-tham-khao) — mirror: [enhancement spot](sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)
+- BAdI + calling position = **explicit enhancement option** gán vào spot.
+
+---
+
+## 8. Lỗi thường gặp
+
+| Triệu chứng | Nguyên nhân thường gặp | Hướng xử lý |
+|-------------|------------------------|-------------|
+| Custom field ACDOCA **trống sau BCF** | Field chưa BCF-relevant; thiếu entry catalog / chưa append qua BAdI | Kiểm tra `FINSC_ACDOC_FCT`; implement `CHANGE_ACTIVE_FIELDS_BCF_*` — xem [KBA 3588343](sources/sap-kba/KBA-3588343.md) |
+| Breakpoint **không dừng** | Debug nhầm interface; user/job khác; chưa active implementation | Debug class `ZCL_*`; external breakpoint đúng user; SM37 + `JDBG` cho job |
+| `CX_BADI_NOT_IMPLEMENTED` | Single-use BAdI, không có implementation active | Tạo/activate `ZBI_*` hoặc fallback class (SAP gợi ý) — [GET BADI](sources/sap-abap-cloud/3008-ABAPGET_BADI.md) |
+| `CX_BADI_MULTIPLY_IMPLEMENTED` | Single-use nhưng nhiều implementation active | Chỉ giữ một implementation active hoặc kiểm tra filter |
+| `CX_BADI_FILTER_ERROR` | Sai filter khi `GET BADI` | Kiểm tra filter definition và giá trị `FILTERS` / `FILTER-TABLE` |
+| `CX_BADI_INITIAL_REFERENCE` / lỗi CALL | `badi` initial (single-use) | Đảm bảo `GET BADI` thành công trước `CALL BADI` |
+| Syntax error trong implementation | Sai tên CHANGING parameter | `SE24` → signature thật; không copy mù `ct_active_fields` |
+| BCF QA/PRD khác DEV | Thiếu transport / implementation inactive | Transport `ZEI_*`/`ZBI_*`/`ZCL_*`; activate đủ chain |
+| Comment code nhưng vẫn “có BAdI” | Disable không chuẩn | Ưu tiên **inactive** BAdI implementation trong SE19 [[S5]](#nguon-tham-khao) |
+
+**Exception class (tham khảo):** `CX_BADI_CONTEXT_ERROR`, `CX_BADI_FILTER_ERROR`, `CX_BADI_NOT_IMPLEMENTED`, `CX_BADI_MULTIPLY_IMPLEMENTED`, `CX_BADI_UNKNOWN_ERROR` — chi tiết trong [GET BADI](sources/sap-abap-cloud/3008-ABAPGET_BADI.md).
+
+---
+
+## 9. Lưu ý quan trọng
+
+### Trước khi code
+
+- Luôn xác nhận **method** đúng: `BCF_OI` (open item), `BCF_BS`, `BCF_PL`.
+- Xác nhận **CHANGING parameter** trên `SE24` — không giả định tên parameter.
+- Kiểm tra customizing field: `FINSC_ACDOC_FCT` — [tóm tắt](sources/finance/FINSC_ACDOC_FCT.md).
+
+### Khi vận hành
+
+- **Activate** enhancement implementation + BAdI implementation + class sau mỗi thay đổi.
+- **Transport** theo thứ tự DEV → QA → PRD; test BCF trên từng tier.
+- **Disable:** inactive implementation (chuẩn) trước khi xóa object.
+- **Không sửa** SAP standard: `ES_FINS_ACDOCA`, `BADI_FINS_ACDOC_FIELDCAT`, `IF_BADI_*`.
+
+### Public Cloud vs on-prem
+
+- Public Cloud: custom field BCF có thể bị giới hạn bởi extensibility — [tóm tắt Community](sources/sap-community/balance-carryforward-custom-fields.md).
+- On-prem / private: BAdI `BADI_FINS_ACDOC_FIELDCAT` thường là hướng xử lý khi field đã có trên ACDOCA nhưng BCF bỏ qua.
+
+---
+
+## 10. Ảnh hưởng liên quan
+
+| Vùng | Ảnh hưởng khi implement / disable BAdI |
+|------|----------------------------------------|
+| **Balance Carryforward** | Field có/không xuất hiện trong active fields khi chạy BCF → ảnh hưởng số dư đầu kỳ ACDOCA |
+| **Open item managed accounts** | Method `CHANGE_ACTIVE_FIELDS_BCF_OI` — case KBA 3588343 |
+| **P&L / Balance Sheet** | Method `BCF_PL` / `BCF_BS` — phân loại field theo loại BCF |
+| **Display / reporting** | Line items năm mới có thể thiếu cột custom field dù có posting |
+| **Upgrade S/4** | Sau upgrade, extended items có thể blank nếu chưa khai báo lại relevance + BAdI |
+| **Transport** | Thiếu object trên QA/PRD → hành vi khác DEV |
+| **Performance BCF** | Append nhiều field không cần → tăng dữ liệu xử lý BCF (cân nhắc chỉ field bắt buộc) |
+
+**Chương trình / app kiểm tra:** `FAGLGVTR`, **Carry Forward Balances**, **Display Line Items** (GL).
+
+---
+
 ## Nguồn tham khảo
 
 ### [S1] SAP ABAP Keyword Documentation — BAdI (Glossary)
@@ -426,6 +513,18 @@ https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATI
 ### [S6] SAP ABAP Keyword Documentation — BAdI implementation class
 
 https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html
+
+### [S7] SAP KBA 3588343 — ACDOCA blank after BCF (preview)
+
+https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — mirror: [sources/sap-kba/KBA-3588343.md](sources/sap-kba/KBA-3588343.md)
+
+### [S8] SAP Community — Balance Carryforward custom fields (tóm tắt)
+
+https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — mirror: [sources/sap-community/balance-carryforward-custom-fields.md](sources/sap-community/balance-carryforward-custom-fields.md)
+
+### Mirror ABAP Cloud trong repo
+
+Toàn bộ trang ABAP Keyword Documentation liên quan: [docs/sources/sap-abap-cloud/](sources/sap-abap-cloud/)
 
 ---
 

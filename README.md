@@ -10,6 +10,7 @@ Tài liệu nội bộ team về thao tác BAdI trong SAP S/4HANA Finance (Balan
 | [docs/Huong_dan_BADI_FINS_ACDOC.html](docs/Huong_dan_BADI_FINS_ACDOC.html) | Hướng dẫn thao tác — HTML (mở trình duyệt) |
 | [wiki/index.html](wiki/index.html) | **Wiki tra cứu nhanh** — cổng vào tài liệu SAP ABAP (Cloud) |
 | [wiki/Home.md](wiki/Home.md) | Mục lục wiki (Markdown / GitHub) |
+| [docs/sources/](docs/sources/README.md) | **Mirror nguồn SAP** — ABAP doc, KBA, Community, FINSC_ACDOC_FCT |
 
 ### Wiki — xem nhanh
 

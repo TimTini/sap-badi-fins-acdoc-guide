@@ -18,8 +18,15 @@ Mở **[index.html](index.html)** — trang tổng hợp có link tới từng c
 | [BAdI implementation class](BAdI-Implementation-Class.md) | Class chứa code thật |
 | [GET BADI](GET-BADI.md) | Tạo BAdI object, chọn implementation |
 | [CALL BADI](CALL-BADI.md) | Gọi method trên object plug-in |
+| [Tìm điểm enhance](Tim-diem-enhance.md) | SE19, SE84, where-used BCF |
+| [Lỗi thường gặp](Loi-thuong-gap.md) | BCF blank, exception BAdI, debug |
+| [Lưu ý & ảnh hưởng](Luu-y-va-anh-huong.md) | Transport, FINSC_ACDOC_FCT |
 
-## Nguồn
+## Nguồn mirror trong repo
+
+[docs/sources/](../docs/sources/README.md) — ABAP Cloud, KBA 3588343, Community, FINSC_ACDOC_FCT.
+
+## Nguồn SAP (link gốc)
 
 Trích từ **SAP ABAP Keyword Documentation (Cloud)**. Bản đầy đủ trên SAP Help — link trong từng trang.
 
