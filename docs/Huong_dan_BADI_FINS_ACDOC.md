@@ -37,8 +37,6 @@ Vì vậy code ABAP được viết trong implementation class, còn interface B
 
 Áp vào case `BADI_FINS_ACDOC_FIELDCAT`:
 
-![Hình 1 — Sơ đồ quan hệ object](images/01-badi-object-relation.svg)
-
 ```text
 SAP Standard
 └── Enhancement Spot: ES_FINS_ACDOCA
@@ -81,12 +79,6 @@ ZEI_FINS_ACDOCA
 ZBI_FINS_ACDOC_FCAT
 ZCL_IM_FINS_ACDOC_FCAT
 ```
-
-![Hình 2 — SE19 New BAdI + Enhancement Spot](images/02-se19-new-badi-enhancement-spot.png)
-
-![Hình 3 — SE19 Enhancement Implementation Active](images/03-se19-enhancement-implementation-zbi-active.png)
-
-> Ảnh PNG từ [SAP Help](https://help.sap.com/saphelp_snc70/helpdata/en/44/f518d884056c30e10000000a114a6b/content.htm) và [SAP Community](https://community.sap.com/t5/application-development-and-automation-blog-posts/adding-wrbtr-column-in-the-standard-report-rfumsv00-vat-report/ba-p/13242101) — object ví dụ SAP, không phải `ZBI_*` trên DEV. Nguồn: `images/SOURCES.md`.
 
 ### Các bước
 
@@ -150,8 +142,6 @@ Nếu liên quan P&L:
 CHANGE_ACTIVE_FIELDS_BCF_PL
 ```
 
-![Hình 4 — SE24 method Parameters](images/04-se24-method-parameters-bcf-oi.png)
-
 ### Code mẫu
 
 Thay `ZZBRANCH` bằng technical field name thật trong `ACDOCA`.
@@ -183,8 +173,6 @@ Sau đó kiểm tra tên **CHANGING parameter** thật trong hệ thống của 
 ---
 
 ## 3. Disable / Deactivate
-
-![Hình 5 — SE19 deactivate BAdI implementation](images/05-se19-deactivate-badi-implementation.png)
 
 ### Khi nào dùng?
 
@@ -242,8 +230,6 @@ Lưu ý: cách này vẫn làm BAdI được gọi, chỉ là không còn tác �
 ---
 
 ## 4. Xóa implementation
-
-![Hình 7 — SE84 kiểm tra BAdI implementation](images/07-se84-check-badi-implementation.png)
 
 ### Thứ tự xóa khuyến nghị
 
@@ -344,8 +330,6 @@ SE84
 ---
 
 ## 5. Debug nhanh
-
-![Hình 6 — Breakpoint trong implementation class](images/06-debug-breakpoint-zcl-im.png)
 
 ### Không debug trong interface
 
