@@ -9,27 +9,27 @@
 
 ### BAdI là gì?
 
-BAdI là viết tắt của **Business Add-In**. Trong ABAP Keyword Documentation, BAdI là template cho BAdI object, gồm BAdI interface, filters và các setting liên quan. [[S1]](#nguon-tham-khao)
+BAdI là viết tắt của **Business Add-In**. Trong ABAP Keyword Documentation, BAdI là template cho BAdI object, gồm BAdI interface, filters và các setting liên quan. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html)
 
-BAdI cho phép implement enhancement cho ứng dụng SAP standard mà không sửa original code của SAP. [[S2]](#nguon-tham-khao)
+BAdI cho phép implement enhancement cho ứng dụng SAP standard mà không sửa original code của SAP. [[S2]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html)
 
-Trong ABAP enhancement concept, BAdI và điểm gọi của nó trong chương trình ABAP tạo thành explicit enhancement options và được gán vào enhancement spots. [[S3]](#nguon-tham-khao)
+Trong ABAP enhancement concept, BAdI và điểm gọi của nó trong chương trình ABAP tạo thành explicit enhancement options và được gán vào enhancement spots. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
 
 ### Enhance BAdI là gì?
 
-Với New BAdI, khi tạo implementation trong Enhancement Framework, bạn quản trị nó thông qua **enhancement implementation**. [[S4]](#nguon-tham-khao)
+Với New BAdI, khi tạo implementation trong Enhancement Framework, bạn quản trị nó thông qua **enhancement implementation**. [[S4]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html)
 
-Sau đó tạo **BAdI implementation** và gắn vào BAdI definition tương ứng trong spot. [[S4]](#nguon-tham-khao)
+Sau đó tạo **BAdI implementation** và gắn vào BAdI definition tương ứng trong spot. [[S4]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html)
 
-Trong SE19, thao tác thường gặp là chọn **New BAdI**, nhập **Enhancement Spot**, rồi tạo enhancement implementation. [[S5]](#nguon-tham-khao)
+Trong SE19, thao tác thường gặp là chọn **New BAdI**, nhập **Enhancement Spot**, rồi tạo enhancement implementation. [[S5]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html)
 
 ### Implementation Class là gì?
 
-ABAP Keyword Documentation nói BAdI chủ yếu gồm **BAdI implementation class**, và instance của class này enhance function của ABAP program tại runtime như một object plug-in. [[S3]](#nguon-tham-khao)
+ABAP Keyword Documentation nói BAdI chủ yếu gồm **BAdI implementation class**, và instance của class này enhance function của ABAP program tại runtime như một object plug-in. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
 
-ABAP Glossary nói BAdI implementation classes là thành phần chính của BAdI implementations, và instance của chúng hoạt động như object plug-ins cho functional enhancements của ABAP programs. [[S6]](#nguon-tham-khao)
+ABAP Glossary nói BAdI implementation classes là thành phần chính của BAdI implementations, và instance của chúng hoạt động như object plug-ins cho functional enhancements của ABAP programs. [[S6]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html)
 
-Vì vậy code ABAP được viết trong implementation class, còn interface BAdI chỉ khai báo các method mà implementation class phải implement. [[S3]](#nguon-tham-khao)
+Vì vậy code ABAP được viết trong implementation class, còn interface BAdI chỉ khai báo các method mà implementation class phải implement. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
 
 ---
 
@@ -427,7 +427,7 @@ SM37
 
 ### 7.4 Khái niệm (SAP)
 
-- **Enhancement spot** — quản trị explicit enhancement options (BAdI + điểm gọi). [[S3]](#nguon-tham-khao) — mirror: [enhancement spot](sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)
+- **Enhancement spot** — quản trị explicit enhancement options (BAdI + điểm gọi). [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html) — mirror: [enhancement spot](sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)
 - BAdI + calling position = **explicit enhancement option** gán vào spot.
 
 ---
@@ -444,7 +444,7 @@ SM37
 | `CX_BADI_INITIAL_REFERENCE` / lỗi CALL | `badi` initial (single-use) | Đảm bảo `GET BADI` thành công trước `CALL BADI` |
 | Syntax error trong implementation | Sai tên CHANGING parameter | `SE24` → signature thật; không copy mù `ct_active_fields` |
 | BCF QA/PRD khác DEV | Thiếu transport / implementation inactive | Transport `ZEI_*`/`ZBI_*`/`ZCL_*`; activate đủ chain |
-| Comment code nhưng vẫn “có BAdI” | Disable không chuẩn | Ưu tiên **inactive** BAdI implementation trong SE19 [[S5]](#nguon-tham-khao) |
+| Comment code nhưng vẫn “có BAdI” | Disable không chuẩn | Ưu tiên **inactive** BAdI implementation trong SE19 [[S5]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html) |
 
 **Exception class (tham khảo):** `CX_BADI_CONTEXT_ERROR`, `CX_BADI_FILTER_ERROR`, `CX_BADI_NOT_IMPLEMENTED`, `CX_BADI_MULTIPLY_IMPLEMENTED`, `CX_BADI_UNKNOWN_ERROR` — chi tiết trong [GET BADI](sources/sap-abap-cloud/3008-ABAPGET_BADI.md).
 

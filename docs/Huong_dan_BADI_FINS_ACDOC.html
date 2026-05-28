@@ -243,19 +243,19 @@
         <h2>0. Cơ bản: BAdI là gì?</h2>
 
         <h3>BAdI là gì?</h3>
-        <p>BAdI là viết tắt của <strong>Business Add-In</strong>. Trong ABAP Keyword Documentation, BAdI là template cho BAdI object, gồm BAdI interface, filters và các setting liên quan. <a class="ref" href="#s1">[S1]</a></p>
-        <p>BAdI cho phép implement enhancement cho ứng dụng SAP standard mà không sửa original code của SAP. <a class="ref" href="#s2">[S2]</a></p>
-        <p>Trong ABAP enhancement concept, BAdI và điểm gọi của nó trong chương trình ABAP tạo thành explicit enhancement options và được gán vào enhancement spots. <a class="ref" href="#s3">[S3]</a></p>
+        <p>BAdI là viết tắt của <strong>Business Add-In</strong>. Trong ABAP Keyword Documentation, BAdI là template cho BAdI object, gồm BAdI interface, filters và các setting liên quan. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_GLOSRY">[S1]</a></p>
+        <p>BAdI cho phép implement enhancement cho ứng dụng SAP standard mà không sửa original code của SAP. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html" target="_blank" rel="noopener" title="SAP Help: ABENENHANCEMENT_FRAMEWORK">[S2]</a></p>
+        <p>Trong ABAP enhancement concept, BAdI và điểm gọi của nó trong chương trình ABAP tạo thành explicit enhancement options và được gán vào enhancement spots. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_ENHANCEMENT">[S3]</a></p>
 
         <h3>Enhance BAdI là gì?</h3>
-        <p>Với New BAdI, khi tạo implementation trong Enhancement Framework, bạn quản trị nó thông qua <strong>enhancement implementation</strong>. <a class="ref" href="#s4">[S4]</a></p>
-        <p>Sau đó tạo <strong>BAdI implementation</strong> và gắn vào BAdI definition tương ứng trong spot. <a class="ref" href="#s4">[S4]</a></p>
-        <p>Trong SE19, thao tác thường gặp là chọn <strong>New BAdI</strong>, nhập <strong>Enhancement Spot</strong>, rồi tạo enhancement implementation. <a class="ref" href="#s5">[S5]</a></p>
+        <p>Với New BAdI, khi tạo implementation trong Enhancement Framework, bạn quản trị nó thông qua <strong>enhancement implementation</strong>. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html" target="_blank" rel="noopener" title="SAP Help: ABENENHANCEMENT_IMPL_GLOSRY">[S4]</a></p>
+        <p>Sau đó tạo <strong>BAdI implementation</strong> và gắn vào BAdI definition tương ứng trong spot. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html" target="_blank" rel="noopener" title="SAP Help: ABENENHANCEMENT_IMPL_GLOSRY">[S4]</a></p>
+        <p>Trong SE19, thao tác thường gặp là chọn <strong>New BAdI</strong>, nhập <strong>Enhancement Spot</strong>, rồi tạo enhancement implementation. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_IMPLEMENTATION_GLOSRY">[S5]</a></p>
 
         <h3>Implementation Class là gì?</h3>
-        <p>ABAP Keyword Documentation nói BAdI chủ yếu gồm <strong>BAdI implementation class</strong>, và instance của class này enhance function của ABAP program tại runtime như một object plug-in. <a class="ref" href="#s3">[S3]</a></p>
-        <p>ABAP Glossary: BAdI implementation classes là thành phần chính của BAdI implementations; instance hoạt động như object plug-ins. <a class="ref" href="#s6">[S6]</a></p>
-        <p><strong>Kết luận:</strong> code ABAP viết trong implementation class; interface BAdI chỉ khai báo method. <a class="ref" href="#s3">[S3]</a></p>
+        <p>ABAP Keyword Documentation nói BAdI chủ yếu gồm <strong>BAdI implementation class</strong>, và instance của class này enhance function của ABAP program tại runtime như một object plug-in. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_ENHANCEMENT">[S3]</a></p>
+        <p>ABAP Glossary: BAdI implementation classes là thành phần chính của BAdI implementations; instance hoạt động như object plug-ins. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_IMPLEMENT_CLASS_GLOSRY">[S6]</a></p>
+        <p><strong>Kết luận:</strong> code ABAP viết trong implementation class; interface BAdI chỉ khai báo method. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_ENHANCEMENT">[S3]</a></p>
       </section>
 
       <section id="quan-he">
@@ -350,7 +350,7 @@ ENDMETHOD.</pre>
         <ol class="steps">
           <li>Vào <code class="inline">SE19</code>, mở Enhancement Implementation <code class="inline">ZEI_FINS_ACDOCA</code>.</li>
           <li>Change mode → node BAdI Implementation <code class="inline">ZBI_FINS_ACDOC_FCAT</code>.</li>
-          <li><strong>Deactivate implementation</strong> hoặc tắt active flag (BAdI implementation có trạng thái active/inactive). <a class="ref" href="#s5">[S5]</a></li>
+          <li><strong>Deactivate implementation</strong> hoặc tắt active flag (BAdI implementation có trạng thái active/inactive). <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html" target="_blank" rel="noopener" title="SAP Help: ABENBADI_IMPLEMENTATION_GLOSRY">[S5]</a></li>
           <li>Save và Activate lại object nếu hệ thống yêu cầu.</li>
           <li>Test lại Balance Carryforward: <code class="inline">FAGLGVTR</code> hoặc app <strong>Carry Forward Balances</strong>.</li>
         </ol>
