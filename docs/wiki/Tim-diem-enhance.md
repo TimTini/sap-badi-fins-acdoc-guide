@@ -2,25 +2,28 @@
 
 [← Home](Home.md) · [Hướng dẫn §7](../Huong_dan_BADI_FINS_ACDOC.md#7-cách-tìm-điểm-để-enhance--tổng-quát)
 
-## Tóm tắt
+## Mục đích
 
-1. Viết rõ **mục đích runtime** (hook ở bước nào).
-2. Xác định **transaction/process** → tìm `GET BADI` / `CALL BADI`.
-3. **SE84** (package → Enhancements) hoặc **SE24** (`CL_EXITHANDLER`).
-4. Đọc **method signature** — cần đổi dữ liệu thì thường cần `CHANGING`.
-5. Kiểm tra **filter** và **active**.
-6. **Debug** xác nhận BAdI chạy thật.
+Tóm tắt cách tìm BAdI / enhancement spot theo mục đích runtime. Chi tiết đầy đủ nằm ở hướng dẫn chính §7.
 
-## Case Finance (BCF / ACDOCA)
+## Nội dung chính
 
-| T-code | Việc làm |
-|--------|----------|
-| `SE19` | `ES_FINS_ACDOCA`, `BADI_FINS_ACDOC_FIELDCAT` |
-| `SE24` | `IF_BADI_FINS_ACDOC_FIELDCAT` → `CHANGE_ACTIVE_FIELDS_BCF_*` |
-| `FAGLGVTR` | Where-used / `GET BADI` trong luồng BCF |
+1. Viết mục đích runtime (hook ở bước nào).
+2. Xác định transaction/process → tìm `GET BADI` / `CALL BADI`.
+3. `SE84` (package → Enhancements) hoặc `SE24` (`CL_EXITHANDLER`).
+4. Đọc method signature — cần `CHANGING` nếu muốn đổi dữ liệu.
+5. Kiểm tra filter và active.
+6. Debug xác nhận trong `ZCL_*`.
 
-Chi tiết: [Hướng dẫn đầy đủ §7](../Huong_dan_BADI_FINS_ACDOC.html#tim-enhance).
+**Case Finance:** `SE19` → `ES_FINS_ACDOCA` / `BADI_FINS_ACDOC_FIELDCAT`; method `CHANGE_ACTIVE_FIELDS_BCF_*`; test `FAGLGVTR`.
 
-## Nguồn
+## Kiểm tra / Cách xác minh
 
-[S9–S16](../Huong_dan_BADI_FINS_ACDOC.md#nguồn-tham-khảo) trong hướng dẫn chính.
+- Breakpoint trong `ZCL_IM_FINS_ACDOC_FCAT` trước khi chạy BCF.
+- Nếu không dừng: kiểm tra active, filter, đúng user/job (`SM37` + `JDBG`).
+
+## Link nguồn
+
+- Hướng dẫn đầy đủ §7: [Huong_dan_BADI_FINS_ACDOC.md](../Huong_dan_BADI_FINS_ACDOC.md#7-cách-tìm-điểm-để-enhance--tổng-quát) — quy trình 6 bước + case Finance
+- SAP Library — Enhancement Concept: https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm — enhancement option, hook
+- SAP Support — find classic BAdIs: https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html — SE84, package

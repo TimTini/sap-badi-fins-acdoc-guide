@@ -9,4 +9,4 @@ Bản sao phục vụ tra cứu offline. Bản chính thức luôn là link SAP 
 | [sap-community/](sap-community/) | Tóm tắt kỹ thuật từ SAP Community (đã sanitize) |
 | [finance/](finance/) | Field catalog ACDOCA — `FINSC_ACDOC_FCT` |
 
-**Bản quyền:** Nội dung SAP thuộc SAP SE. Chỉ dùng nội bộ team; không phát hành lại như tài liệu SAP chính thức.
+**Bản quyền:** Nội dung SAP thuộc SAP SE. Mirror chỉ để tham khảo; không thay thế tài liệu SAP chính thức.

@@ -1,7 +1,26 @@
 # Hướng dẫn BAdI `BADI_FINS_ACDOC_FIELDCAT`
 
-> Tài liệu ngắn gọn bằng tiếng Việt, dùng cho thao tác cơ bản với BAdI trong SAP S/4HANA Finance.  
-> Trọng tâm: hiểu BAdI, Enhancement Implementation, BAdI Implementation, Implementation Class, và 3 thao tác: **Tạo**, **Disable**, **Xóa**.
+## Mục đích
+
+Ghi lại thao tác với BAdI `BADI_FINS_ACDOC_FIELDCAT` trên S/4HANA Finance: **tạo** implementation, **deactivate**, **xóa**, **debug**, và **tìm điểm enhance**. Object mẫu: `ES_FINS_ACDOCA`, `ZEI_FINS_ACDOCA`, `ZBI_FINS_ACDOC_FCAT`, `ZCL_IM_FINS_ACDOC_FCAT` — xác nhận trên hệ DEV trước khi transport.
+
+## Khi dùng
+
+- Field custom trên `ACDOCA` **trống sau Balance Carryforward** (tài khoản open-item).
+- Cần đưa field vào **active fields** khi chạy BCF (`FAGLGVTR` hoặc app **Carry Forward Balances**).
+- Cần tắt tạm BAdI customer để test / so sánh với standard.
+- Cần tìm BAdI hoặc enhancement spot trong module Finance.
+
+## Điều kiện trước khi làm
+
+- User có quyền `SE19`, `SE24`, `SE80`/`SE84` trên **DEV** (hoặc sandbox).
+- Đã có technical name field trên `ACDOCA`; đã xem `FINSC_ACDOC_FCT` nếu field chưa BCF-relevant.
+- Có transport hoặc package (ví dụ `$TMP`) cho object `ZEI_*`, `ZBI_*`, `ZCL_*`.
+- Trước khi viết code: `SE24` → `IF_BADI_FINS_ACDOC_FIELDCAT` → tab **Parameters** của method BCF — ghi đúng tên **CHANGING parameter**.
+
+## Nội dung chính
+
+Các mục §0–§10 bên dưới: khái niệm, thao tác, checklist, tìm BAdI, lỗi, lưu ý vận hành.
 
 ---
 
@@ -9,27 +28,19 @@
 
 ### BAdI là gì?
 
-BAdI là viết tắt của **Business Add-In**. Trong ABAP Keyword Documentation, BAdI là template cho BAdI object, gồm BAdI interface, filters và các setting liên quan. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html)
+**Business Add-In (BAdI)** — template gồm interface, filter, setting; runtime gọi method trên **object plug-in**. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html) · [[S12]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html)
 
-BAdI cho phép implement enhancement cho ứng dụng SAP standard mà không sửa original code của SAP. [[S2]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html)
+Enhancement qua BAdI **không sửa** source SAP standard. [[S2]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html)
 
-Trong ABAP enhancement concept, BAdI và điểm gọi của nó trong chương trình ABAP tạo thành explicit enhancement options và được gán vào enhancement spots. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
+BAdI và điểm gọi trong program = **explicit enhancement option**, gom trong **enhancement spot**. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
 
 ### Enhance BAdI là gì?
 
-Với New BAdI, khi tạo implementation trong Enhancement Framework, bạn quản trị nó thông qua **enhancement implementation**. [[S4]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html)
-
-Sau đó tạo **BAdI implementation** và gắn vào BAdI definition tương ứng trong spot. [[S4]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html)
-
-Trong SE19, thao tác thường gặp là chọn **New BAdI**, nhập **Enhancement Spot**, rồi tạo enhancement implementation. [[S5]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html)
+Trên `SE19`: chọn **New BAdI**, nhập **Enhancement Spot**, tạo **enhancement implementation** (container `ZEI_*`), rồi **BAdI implementation** (`ZBI_*`) và class `ZCL_*`. [[S4]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html) · [[S5]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html)
 
 ### Implementation Class là gì?
 
-ABAP Keyword Documentation nói BAdI chủ yếu gồm **BAdI implementation class**, và instance của class này enhance function của ABAP program tại runtime như một object plug-in. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
-
-ABAP Glossary nói BAdI implementation classes là thành phần chính của BAdI implementations, và instance của chúng hoạt động như object plug-ins cho functional enhancements của ABAP programs. [[S6]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html)
-
-Vì vậy code ABAP được viết trong implementation class, còn interface BAdI chỉ khai báo các method mà implementation class phải implement. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html)
+Code ABAP viết trong **implementation class** (`ZCL_IM_*`). Interface (`IF_BADI_*`) chỉ khai báo method — không viết logic. [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html) · [[S6]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html)
 
 ---
 
@@ -122,6 +133,12 @@ ZCL_IM_FINS_ACDOC_FCAT
 
 8. Code trong class `ZCL_IM_FINS_ACDOC_FCAT`, không code trong interface `IF_BADI_FINS_ACDOC_FIELDCAT`.
 
+### Kiểm tra (sau khi tạo)
+
+1. `SE19` → mở `ZBI_FINS_ACDOC_FCAT` → trạng thái **Active**.
+2. `SE24` → `ZCL_IM_FINS_ACDOC_FCAT` → method `CHANGE_ACTIVE_FIELDS_BCF_*` đã activate.
+3. Chạy thử `FAGLGVTR` (hoặc app BCF) — field custom có trong active fields (sau khi đã cấu hình `FINSC_ACDOC_FCT`).
+
 ### Method thường dùng
 
 Nếu xử lý custom field ACDOCA bị blank trong Balance Carryforward với open-item-managed account, thường kiểm tra method:
@@ -211,6 +228,11 @@ FAGLGVTR
 ```
 
 hoặc app **Carry Forward Balances**.
+
+### Kiểm tra (sau khi disable)
+
+1. `SE19` → `ZBI_FINS_ACDOC_FCAT` → **inactive** (không còn active).
+2. Chạy lại `FAGLGVTR` — field custom không còn được append qua BAdI.
 
 ### Cách disable bằng code
 
@@ -373,7 +395,9 @@ SM37
 
 ---
 
-## 6. Checklist cuối
+## Kiểm tra / Cách xác minh
+
+Tổng hợp checklist sau thao tác (chi tiết từng bước xem §2–§5).
 
 ### Tạo
 
@@ -548,7 +572,7 @@ Mục đích khác append field → quay lại quy trình §7.4: *mục đích r
 | `CX_BADI_NOT_IMPLEMENTED` | Single-use BAdI, không có implementation active | Tạo/activate `ZBI_*` hoặc fallback class (SAP gợi ý) — [GET BADI](sources/sap-abap-cloud/3008-ABAPGET_BADI.md) |
 | `CX_BADI_MULTIPLY_IMPLEMENTED` | Single-use nhưng nhiều implementation active | Chỉ giữ một implementation active hoặc kiểm tra filter |
 | `CX_BADI_FILTER_ERROR` | Sai filter khi `GET BADI` | Kiểm tra filter definition và giá trị `FILTERS` / `FILTER-TABLE` |
-| `CX_BADI_INITIAL_REFERENCE` / lỗi CALL | `badi` initial (single-use) | Đảm bảo `GET BADI` thành công trước `CALL BADI` |
+| `CX_BADI_INITIAL_REFERENCE` / lỗi CALL | `badi` initial (single-use) | Chạy `GET BADI` thành công trước `CALL BADI` |
 | Syntax error trong implementation | Sai tên CHANGING parameter | `SE24` → signature thật; không copy mù `ct_active_fields` |
 | BCF QA/PRD khác DEV | Thiếu transport / implementation inactive | Transport `ZEI_*`/`ZBI_*`/`ZCL_*`; activate đủ chain |
 | Comment code nhưng vẫn “có BAdI” | Disable không chuẩn | Ưu tiên **inactive** BAdI implementation trong SE19 [[S5]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html) |
@@ -595,82 +619,28 @@ Mục đích khác append field → quay lại quy trình §7.4: *mục đích r
 
 ---
 
-## Nguồn tham khảo
+## Link nguồn
 
-### [S1] SAP ABAP Keyword Documentation — BAdI (Glossary)
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html
-
-### [S2] SAP ABAP Keyword Documentation — ABAP - Enhancements
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html
-
-### [S3] SAP ABAP Keyword Documentation — Enhancements Using BAdIs
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html
-
-### [S4] SAP ABAP Keyword Documentation — enhancement implementation
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html
-
-### [S5] SAP ABAP Keyword Documentation — BAdI implementation
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html
-
-### [S6] SAP ABAP Keyword Documentation — BAdI implementation class
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html
-
-### [S7] SAP KBA 3588343 — ACDOCA blank after BCF (preview)
-
-https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — mirror: [sources/sap-kba/KBA-3588343.md](sources/sap-kba/KBA-3588343.md)
-
-### [S8] SAP Community — Balance Carryforward custom fields (tóm tắt)
-
-https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — mirror: [sources/sap-community/balance-carryforward-custom-fields.md](sources/sap-community/balance-carryforward-custom-fields.md)
-
-### [S9] SAP Library — Enhancement Concept
-
-https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm
-
-### [S10] ABAP Keyword Documentation — GET BADI
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html — mirror: [sources/sap-abap-cloud/3008-ABAPGET_BADI.md](sources/sap-abap-cloud/3008-ABAPGET_BADI.md)
-
-### [S11] ABAP Keyword Documentation — CALL BADI
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html
-
-### [S12] ABAP Keyword Documentation — object plug-in
-
-https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html
-
-### [S13] SAP Support — How to find classic BAdIs
-
-https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html
-
-### [S14] SAP Support — Find a BADI
-
-https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525647.html
-
-### [S15] SAP Help — Breakpoints (characteristics)
-
-https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec121276e391014adc9fffe4e204223.html
-
-### [S16] SAP Help — Setting dynamic breakpoints (ADT)
-
-https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/setting-dynamic-breakpoints
-
-### Mirror ABAP Cloud trong repo
-
-Toàn bộ trang ABAP Keyword Documentation liên quan: [docs/sources/sap-abap-cloud/](sources/sap-abap-cloud/)
+- SAP ABAP — BAdI (Glossary): https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html — khái niệm BAdI, filter, interface
+- SAP ABAP — Enhancements: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html — enhancement framework
+- SAP ABAP — Enhancements Using BAdIs: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html — spot, explicit option
+- SAP ABAP — enhancement implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html — container `ZEI_*`
+- SAP ABAP — BAdI implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html — active/inactive `ZBI_*`
+- SAP ABAP — BAdI implementation class: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html — class `ZCL_*`
+- SAP KBA 3588343: https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — ACDOCA blank sau BCF; mirror [KBA-3588343](sources/sap-kba/KBA-3588343.md)
+- SAP Community — BCF custom fields: https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — mirror [Community](sources/sap-community/balance-carryforward-custom-fields.md)
+- SAP Library — Enhancement Concept: https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm — enhancement option, hook runtime
+- SAP ABAP — GET BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html — mirror [GET BADI](sources/sap-abap-cloud/3008-ABAPGET_BADI.md)
+- SAP ABAP — CALL BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html — gọi method BAdI
+- SAP ABAP — object plug-in: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html — object plug-in runtime
+- SAP Support — find classic BAdIs: https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html — tìm BAdI qua package/SE84
+- SAP Support — Find a BADI: https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525647.html — `CL_EXITHANDLER`, transaction
+- SAP Help — Breakpoints: https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec121276e391014adc9fffe4e204223.html — external/dynamic breakpoint
+- SAP Help — dynamic breakpoints (ADT): https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/setting-dynamic-breakpoints — đặt breakpoint ADT
+- Mirror ABAP Cloud trong repo: [sources/sap-abap-cloud/](sources/sap-abap-cloud/) — 9 trang keyword doc offline
 
 ---
 
 ## Ghi chú
 
-Tài liệu này dùng để hướng dẫn thao tác và khái niệm cơ bản.
-
-Các tên object/method cụ thể như `ES_FINS_ACDOCA`, `BADI_FINS_ACDOC_FIELDCAT`, `CHANGE_ACTIVE_FIELDS_BCF_*` là phần phụ thuộc hệ thống Finance thực tế, cần xác nhận trực tiếp trong `SE19`/`SE24` trước khi triển khai.
-
-Khi triển khai thật, luôn kiểm tra signature method và parameter trực tiếp trong hệ thống SAP của bạn.
+Object/method (`ES_FINS_ACDOCA`, `CHANGE_ACTIVE_FIELDS_BCF_*`, …) phụ thuộc release Finance — luôn xác nhận trong `SE19`/`SE24` trên hệ bạn trước khi transport QA/PRD.
