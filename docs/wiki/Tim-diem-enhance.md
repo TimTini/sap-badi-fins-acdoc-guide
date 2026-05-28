@@ -1,19 +1,26 @@
 # Cách tìm điểm enhance
 
-[← Home](Home.md) · [Hướng dẫn đầy đủ](../Huong_dan_BADI_FINS_ACDOC.md#7-cách-tìm-điểm-để-enhance)
+[← Home](Home.md) · [Hướng dẫn §7](../Huong_dan_BADI_FINS_ACDOC.md#7-cách-tìm-điểm-để-enhance--tổng-quát)
 
-## Case đã biết BAdI Finance
+## Tóm tắt
 
-`SE19` → `BADI_FINS_ACDOC_FIELDCAT` / `ES_FINS_ACDOCA` → `SE24` interface.
+1. Viết rõ **mục đích runtime** (hook ở bước nào).
+2. Xác định **transaction/process** → tìm `GET BADI` / `CALL BADI`.
+3. **SE84** (package → Enhancements) hoặc **SE24** (`CL_EXITHANDLER`).
+4. Đọc **method signature** — cần đổi dữ liệu thì thường cần `CHANGING`.
+5. Kiểm tra **filter** và **active**.
+6. **Debug** xác nhận BAdI chạy thật.
 
-## Tìm từ repository
+## Case Finance (BCF / ACDOCA)
 
-`SE84` / `SE80` → Enhancements → Spots / BAdI Definitions (package FI-GL).
+| T-code | Việc làm |
+|--------|----------|
+| `SE19` | `ES_FINS_ACDOCA`, `BADI_FINS_ACDOC_FIELDCAT` |
+| `SE24` | `IF_BADI_FINS_ACDOC_FIELDCAT` → `CHANGE_ACTIVE_FIELDS_BCF_*` |
+| `FAGLGVTR` | Where-used / `GET BADI` trong luồng BCF |
 
-## Tìm ngược từ BCF
+Chi tiết: [Hướng dẫn đầy đủ §7](../Huong_dan_BADI_FINS_ACDOC.html#tim-enhance).
 
-`FAGLGVTR` → where-used / search `GET BADI` trong program BCF.
+## Nguồn
 
-## Mirror
-
-[enhancement spot](../sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)
+[S9–S16](../Huong_dan_BADI_FINS_ACDOC.md#nguồn-tham-khảo) trong hướng dẫn chính.

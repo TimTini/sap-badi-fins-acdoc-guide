@@ -207,7 +207,6 @@
       font-size: 13px;
       font-weight: 500;
     }
-}
   </style>
 </head>
 <body>
@@ -238,7 +237,7 @@
           <span class="tag">SE24</span>
           <span class="tag">ACDOCA / BCF</span>
         </div>
-</header>
+      </header>
 
       <section id="co-ban">
         <h2>0. Cơ bản: BAdI là gì?</h2>
@@ -262,7 +261,7 @@
       <section id="quan-he">
         <h2>1. Quan hệ object trong BAdI</h2>
         <p>Áp vào case <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code>:</p>
-<div class="tree">SAP Standard
+        <div class="tree">SAP Standard
 └── Enhancement Spot: ES_FINS_ACDOCA
     └── BAdI Definition: BADI_FINS_ACDOC_FIELDCAT
         └── Interface: IF_BADI_FINS_ACDOC_FIELDCAT
@@ -301,7 +300,8 @@ Customer Z*
         <pre>ZEI_FINS_ACDOCA
 ZBI_FINS_ACDOC_FCAT
 ZCL_IM_FINS_ACDOC_FCAT</pre>
-<h3>Các bước</h3>
+
+        <h3>Các bước</h3>
         <ol class="steps">
           <li>Vào transaction <code class="inline">SE19</code>.</li>
           <li>Chọn tạo implementation cho <strong>New BAdI</strong> hoặc theo <strong>Enhancement Spot</strong>.</li>
@@ -319,7 +319,8 @@ ZCL_IM_FINS_ACDOC_FCAT</pre>
           <span class="pill">CHANGE_ACTIVE_FIELDS_BCF_BS — Balance Sheet</span>
           <span class="pill">CHANGE_ACTIVE_FIELDS_BCF_PL — P&amp;L</span>
         </div>
-<h3>Code mẫu</h3>
+
+        <h3>Code mẫu</h3>
         <div class="alert">
           Thay <code class="inline">ZZBRANCH</code> bằng technical field name thật trong <code class="inline">ACDOCA</code>.
           <strong>Trước khi code:</strong> mở SE24 để xác nhận đúng tên CHANGING parameter trong hệ thống của bạn.
@@ -343,7 +344,8 @@ ENDMETHOD.</pre>
 
         <h3>Khi nào dùng?</h3>
         <p>Tắt ảnh hưởng runtime nhưng vẫn giữ object để sửa tiếp hoặc rollback.</p>
-<h3>Các bước (ưu tiên)</h3>
+
+        <h3>Các bước (ưu tiên)</h3>
         <ol class="steps">
           <li>Vào <code class="inline">SE19</code>, mở Enhancement Implementation <code class="inline">ZEI_FINS_ACDOCA</code>.</li>
           <li>Change mode → node BAdI Implementation <code class="inline">ZBI_FINS_ACDOC_FCAT</code>.</li>
@@ -379,7 +381,8 @@ ENDMETHOD.</pre>
         <pre>ES_FINS_ACDOCA
 BADI_FINS_ACDOC_FIELDCAT
 IF_BADI_FINS_ACDOC_FIELDCAT</pre>
-<h3>Kiểm tra còn sót <code class="inline">ZBI_*</code></h3>
+
+        <h3>Kiểm tra còn sót <code class="inline">ZBI_*</code></h3>
         <table>
           <thead><tr><th>Cách</th><th>Thao tác</th></tr></thead>
           <tbody>
@@ -393,7 +396,8 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
 
       <section id="debug">
         <h2>5. Debug nhanh</h2>
-<h3>Không debug trong interface</h3>
+
+        <h3>Không debug trong interface</h3>
         <p><code class="inline">SE24 → IF_BADI_FINS_ACDOC_FIELDCAT</code> — chỉ là interface.</p>
 
         <h3>Debug trong implementation class</h3>
@@ -440,9 +444,69 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
       </section>
 
       <section id="tim-enhance">
-        <h2>7. Cách tìm điểm để enhance</h2>
-        <p><code class="inline">SE19</code> → <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code> / <code class="inline">ES_FINS_ACDOCA</code> · <code class="inline">SE84</code>/<code class="inline">SE80</code> → Enhancements · Ngược từ BCF: <code class="inline">FAGLGVTR</code> → tìm <code class="inline">GET BADI</code>.</p>
-        <p>Chi tiết: <a href="Huong_dan_BADI_FINS_ACDOC.md">Markdown §7</a> · <a href="wiki/Tim-diem-enhance.md">Wiki</a></p>
+        <h2>7. Cách tìm điểm để enhance — tổng quát</h2>
+        <p>Tìm <strong>enhancement option</strong> / BAdI theo mục đích runtime, không chỉ append field ACDOCA.</p>
+
+        <h3>7.1 Nguyên tắc nền tảng</h3>
+        <p><strong>Enhancement option</strong> là hook trên development object; runtime tới hook thì enhancement được xử lý. <a class="ref" href="https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm" target="_blank" rel="noopener">[S9]</a></p>
+        <p><strong>Enhancement spot</strong> chứa explicit options; <strong>enhancement implementation</strong> chứa implementation elements. <a class="ref" href="https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm" target="_blank" rel="noopener">[S9]</a></p>
+        <p><strong>Hỏi đúng:</strong> <em>SAP standard cho hook ở bước runtime nào?</em> — không bắt đầu bằng “append field ở đâu?”.</p>
+
+        <h3>7.2 BAdI không chỉ để append field</h3>
+        <p>BAdI = object plug-in; method được gọi trong ABAP. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html" target="_blank" rel="noopener">[S1]</a> · <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html" target="_blank" rel="noopener">[S12]</a></p>
+        <p>Khả năng enhance phụ thuộc tên method, documentation, và IMPORTING / CHANGING / EXPORTING. <strong>BAdI ≠ append field.</strong></p>
+
+        <h3>7.3 Mục đích thường gặp</h3>
+        <p><em>Khung thực hành — không phải danh sách official SAP.</em></p>
+        <table>
+          <thead><tr><th>Mục đích</th><th>Nhận diện</th><th>Từ khóa method</th></tr></thead>
+          <tbody>
+            <tr><td>Validate</td><td>Input + lỗi/message</td><td><code class="inline">CHECK</code>, <code class="inline">VALIDATE</code></td></tr>
+            <tr><td>Derive / default</td><td><code class="inline">CHANGING</code> field/structure</td><td><code class="inline">DERIVE</code>, <code class="inline">DEFAULT</code></td></tr>
+            <tr><td>Đổi logic</td><td>Đổi kết quả nghiệp vụ</td><td><code class="inline">CHANGE</code>, <code class="inline">PROCESS</code></td></tr>
+            <tr><td>Field catalog / output</td><td>Field catalog, active fields</td><td><code class="inline">FIELDCAT</code>, <code class="inline">ACTIVE_FIELDS</code></td></tr>
+            <tr><td>Mapping / integration</td><td>Inbound/outbound, interface</td><td><code class="inline">MAP</code>, <code class="inline">INTERFACE</code></td></tr>
+            <tr><td>Event / action</td><td>Gọi tại event process</td><td><code class="inline">EVENT</code>, <code class="inline">SAVE</code></td></tr>
+            <tr><td>Filter implementation</td><td>Có filter runtime</td><td><code class="inline">FILTER</code>, <code class="inline">FLT_VAL</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>7.4 Quy trình tìm BAdI</h3>
+        <h4>Bước 1 — Mục đích runtime</h4>
+        <pre>Tôi muốn can thiệp tại thời điểm ___ để thay đổi/kiểm tra ___.</pre>
+        <h4>Bước 2 — Process / transaction</h4>
+        <p>Chỉ có tác dụng khi standard gọi <code class="inline">GET BADI</code> / <code class="inline">CALL BADI</code>. <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html" target="_blank" rel="noopener">[S10]</a> · <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html" target="_blank" rel="noopener">[S11]</a></p>
+        <h4>Bước 3 — Package / transaction</h4>
+        <p><code class="inline">SE84</code> → Enhancements → BAdI definitions <a class="ref" href="https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html" target="_blank" rel="noopener">[S13]</a>. <code class="inline">SE24</code> → <code class="inline">CL_EXITHANDLER</code> <a class="ref" href="https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525647.html" target="_blank" rel="noopener">[S14]</a>.</p>
+        <h4>Bước 4 — Đọc signature</h4>
+        <p>Cần đổi dữ liệu → thường cần <code class="inline">CHANGING</code> hoặc cơ chế trả kết quả.</p>
+        <h4>Bước 5 — Filter &amp; active</h4>
+        <p>Implementation active? Filter khớp? Process có đi qua BAdI? <a class="ref" href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html" target="_blank" rel="noopener">[S5]</a></p>
+        <h4>Bước 6 — Debug xác nhận</h4>
+        <p>Breakpoint trong <code class="inline">ZCL_*</code> hoặc tại <code class="inline">GET BADI</code> / <code class="inline">CALL BADI</code>. <a class="ref" href="https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec121276e391014adc9fffe4e204223.html" target="_blank" rel="noopener">[S15]</a> · <a class="ref" href="https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/setting-dynamic-breakpoints" target="_blank" rel="noopener">[S16]</a></p>
+
+        <h3>7.5 Checklist</h3>
+        <ul class="checklist">
+          <li>Đúng process và thời điểm runtime</li>
+          <li>Method/documentation khớp mục đích</li>
+          <li>Signature có dữ liệu cần đọc/đổi</li>
+          <li>Filter (nếu có) khớp runtime</li>
+          <li>Đã debug xác nhận BAdI chạy</li>
+        </ul>
+
+        <h3>7.6 Case <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code></h3>
+        <p>Append custom field ACDOCA → method <code class="inline">CHANGE_ACTIVE_FIELDS_BCF_OI</code> / <code class="inline">BCF_BS</code> / <code class="inline">BCF_PL</code>.</p>
+        <table>
+          <thead><tr><th>Bước</th><th>T-code</th><th>Việc làm</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code class="inline">SE19</code></td><td><code class="inline">ES_FINS_ACDOCA</code> / <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code></td></tr>
+            <tr><td>2</td><td><code class="inline">SE24</code></td><td>Interface → method / parameter</td></tr>
+            <tr><td>3</td><td>Where-used</td><td>Program standard gọi BAdI</td></tr>
+            <tr><td>4</td><td><code class="inline">SE84</code></td><td>Keyword <code class="inline">ACDOC</code>, <code class="inline">BCF</code>, <code class="inline">FINS</code></td></tr>
+            <tr><td>5</td><td><code class="inline">FAGLGVTR</code></td><td>Tìm <code class="inline">GET BADI</code> / <code class="inline">CALL BADI</code></td></tr>
+          </tbody>
+        </table>
+        <p><a href="wiki/Tim-diem-enhance.md">Wiki tóm tắt</a> · <a href="Huong_dan_BADI_FINS_ACDOC.md">Markdown đầy đủ</a></p>
       </section>
 
       <section id="loi">
@@ -493,6 +557,30 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
           <dt id="s8">[S8] SAP Community — BCF custom fields</dt>
           <dd><a href="https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529" target="_blank" rel="noopener">Community</a> — <a href="sources/sap-community/balance-carryforward-custom-fields.md">mirror repo</a></dd>
 
+          <dt id="s9">[S9] Enhancement Concept</dt>
+          <dd><a href="https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm" target="_blank" rel="noopener">SAP Library — Enhancement Framework</a></dd>
+
+          <dt id="s10">[S10] GET BADI</dt>
+          <dd><a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html" target="_blank" rel="noopener">ABAPGET_BADI — SAP Help</a></dd>
+
+          <dt id="s11">[S11] CALL BADI</dt>
+          <dd><a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html" target="_blank" rel="noopener">ABAPCALL_BADI — SAP Help</a></dd>
+
+          <dt id="s12">[S12] object plug-in</dt>
+          <dd><a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html" target="_blank" rel="noopener">ABENOBJECT_PLUGIN_GLOSRY — SAP Help</a></dd>
+
+          <dt id="s13">[S13] How to find classic BAdIs</dt>
+          <dd><a href="https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html" target="_blank" rel="noopener">SAP Support Content</a></dd>
+
+          <dt id="s14">[S14] Find a BADI</dt>
+          <dd><a href="https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525647.html" target="_blank" rel="noopener">SAP Support Content</a></dd>
+
+          <dt id="s15">[S15] Breakpoints</dt>
+          <dd><a href="https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec121276e391014adc9fffe4e204223.html" target="_blank" rel="noopener">SAP Help — Breakpoints</a></dd>
+
+          <dt id="s16">[S16] Dynamic breakpoints</dt>
+          <dd><a href="https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/setting-dynamic-breakpoints" target="_blank" rel="noopener">ADT User Guide</a></dd>
+
           <dt>Mirror ABAP Cloud</dt>
           <dd><a href="sources/README.md">docs/sources/</a> (9 trang ABAP + KBA + Finance)</dd>
         </dl>
@@ -510,5 +598,4 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
   </div>
 </body>
 </html>
-
 

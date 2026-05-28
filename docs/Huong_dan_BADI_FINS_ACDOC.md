@@ -401,34 +401,141 @@ SM37
 
 ---
 
-## 7. Cách tìm điểm để enhance
+## 7. Cách tìm điểm để enhance — tổng quát
 
-### 7.1 Từ BAdI / Enhancement Spot đã biết (case Finance)
+Phần này mô tả cách tìm **enhancement option** / BAdI theo mục đích runtime, không chỉ case append field ACDOCA.
+
+### 7.1 Nguyên tắc nền tảng
+
+Trong Enhancement Framework, **enhancement option** là “hook” gắn vào development object; khi runtime tới hook, enhancement tại đó được xử lý. [[S9]](https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm)
+
+SAP chia **implicit** và **explicit** enhancement options. **Enhancement spot** chứa explicit options; **enhancement implementation** chứa phần tử implementation. [[S9]](https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm)
+
+**Cách hỏi đúng:** không bắt đầu bằng “append field ở đâu?”, mà: *SAP standard cho hook ở bước runtime nào?*
+
+### 7.2 BAdI không chỉ để append field
+
+BAdI là enhancement qua **object plug-in**; method BAdI được gọi trong chương trình ABAP. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html) · [[S12]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html)
+
+Khả năng enhance phụ thuộc **tên method**, **documentation**, và **IMPORTING / CHANGING / EXPORTING**. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html)
+
+**BAdI ≠ append field.** Append field chỉ là một mục đích khi method cho phép đổi field catalog, active fields hoặc structure liên quan.
+
+### 7.3 Mục đích thường gặp (khung thực hành)
+
+Không phải danh sách official cố định của SAP; căn cứ: BAdI method gọi tại runtime. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html)
+
+| Mục đích | Nhận diện BAdI phù hợp | Từ khóa method |
+|----------|------------------------|----------------|
+| Validate dữ liệu | Có input + trả lỗi/message/exception | `CHECK`, `VALIDATE`, `BEFORE_SAVE` |
+| Derive / default | Có `CHANGING` cho field/structure | `DERIVE`, `DEFAULT`, `FILL`, `DETERMINE` |
+| Đổi logic xử lý | Nhận dữ liệu nghiệp vụ, đổi kết quả | `CHANGE`, `PROCESS`, `DETERMINE` |
+| Field catalog / output | Table field catalog hoặc active fields | `FIELD`, `FIELDCAT`, `ACTIVE_FIELDS`, `OUTPUT` |
+| Mapping / integration | Mapping, inbound/outbound, interface | `MAP`, `INBOUND`, `OUTBOUND`, `INTERFACE` |
+| Action / event | Gọi tại event trong process | `EVENT`, `ACTION`, `POST`, `SAVE` |
+| Chọn implementation | Có filter hoặc caller truyền filter | `FILTER`, `FLT_VAL` |
+
+### 7.4 Quy trình tìm BAdI theo mục đích
+
+#### Bước 1 — Viết rõ mục đích runtime
+
+```text
+Tôi muốn can thiệp tại thời điểm ___ để thay đổi/kiểm tra ___.
+```
+
+Ví dụ:
+
+```text
+Can thiệp trước khi Balance Carryforward xác định active fields
+để thêm custom field ACDOCA.
+```
+
+#### Bước 2 — Xác định process / transaction
+
+BAdI chỉ có tác dụng khi standard gọi tới điểm `GET BADI` / `CALL BADI`. [[S10]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html) · [[S11]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html)
+
+Debug: tìm `GET BADI` hoặc `CALL BADI` trong luồng chạy.
+
+#### Bước 3 — Tìm theo package hoặc transaction
+
+- **SE84:** package → **Enhancements** → BAdI definitions. [[S13]](https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html)
+- **SE24:** class `CL_EXITHANDLER` (classic BAdI theo transaction). [[S14]](https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525647.html)
+
+```text
+1. Xác định transaction/app/process.
+2. Tìm program/package liên quan.
+3. SE84 → Enhancements → Business Add-Ins → Definitions.
+4. Search theo package hoặc keyword nghiệp vụ.
+```
+
+#### Bước 4 — Đọc method signature
+
+```text
+Method name · Documentation
+IMPORTING / CHANGING / EXPORTING
+Exceptions / messages (nếu có)
+```
+
+Cần **đổi dữ liệu** → thường phải có `CHANGING` hoặc cơ chế trả kết quả. Method chỉ `IMPORTING` thường chỉ đọc/kiểm tra. [[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html)
+
+#### Bước 5 — Filter, multiple use, điều kiện gọi
+
+```text
+Implementation đã active?
+Có filter? Filter value khớp runtime?
+Process có đi qua BAdI này?
+```
+
+[[S1]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html) · [[S5]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html)
+
+#### Bước 6 — Debug xác nhận
+
+External breakpoint (đúng ABAP user) hoặc dynamic breakpoint (statement/message/exception). [[S15]](https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec121276e391014adc9fffe4e204223.html) · [[S16]](https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/setting-dynamic-breakpoints)
+
+```text
+1. Breakpoint trong ZCL_* (hoặc debug GET/CALL BADI).
+2. Chạy transaction/app đúng scenario.
+3. Kiểm tra BAdI có dừng và parameter có dữ liệu cần không.
+4. Không dừng → kiểm tra filter, active, user, job/Fiori.
+```
+
+### 7.5 Checklist chọn đúng BAdI
+
+```text
+[ ] Đúng module/process đang chạy
+[ ] Đúng thời điểm runtime
+[ ] Method name/documentation khớp mục đích
+[ ] Signature có dữ liệu cần đọc/đổi
+[ ] Đổi dữ liệu → có CHANGING hoặc cơ chế trả kết quả
+[ ] Filter (nếu có) khớp runtime
+[ ] Đã debug xác nhận BAdI chạy thật
+```
+
+### 7.6 Áp lại case `BADI_FINS_ACDOC_FIELDCAT`
+
+Mục đích: append custom field ACDOCA vào **active field list** của Balance Carryforward.
+
+Method phù hợp:
+
+```text
+CHANGE_ACTIVE_FIELDS_BCF_OI
+CHANGE_ACTIVE_FIELDS_BCF_BS
+CHANGE_ACTIVE_FIELDS_BCF_PL
+```
+
+Tên method đã thể hiện can thiệp active fields cho BCF.
+
+**Tìm nhanh (Finance):**
 
 | Bước | Transaction | Việc làm |
 |------|-------------|----------|
-| 1 | `SE19` | Tìm BAdI `BADI_FINS_ACDOC_FIELDCAT` hoặc Enhancement Spot `ES_FINS_ACDOCA` |
-| 2 | `SE24` | Mở `IF_BADI_FINS_ACDOC_FIELDCAT` → xem method / parameter |
-| 3 | Where-used | Trên BAdI definition hoặc interface → xem chương trình standard gọi BAdI |
+| 1 | `SE19` | `BADI_FINS_ACDOC_FIELDCAT` / `ES_FINS_ACDOCA` |
+| 2 | `SE24` | `IF_BADI_FINS_ACDOC_FIELDCAT` → method / parameter |
+| 3 | Where-used | BAdI hoặc interface → program standard gọi BAdI |
+| 4 | `SE84` / `SE18` | Enhancements → spot/BAdI; keyword `ACDOC`, `BCF`, `FINS` |
+| 5 | `FAGLGVTR` | Tìm `GET BADI` / `CALL BADI` trong luồng BCF |
 
-### 7.2 Tìm Enhancement Spot / BAdI từ nghiệp vụ
-
-| Bước | Transaction | Việc làm |
-|------|-------------|----------|
-| 1 | `SE84` / `SE80` | Repository Browser → **Enhancements** → Enhancement Spots / BAdI Definitions |
-| 2 | `SE18` | Enhancement Spot Builder — duyệt spot theo component/package FI-GL (nếu có quyền) |
-| 3 | Search | Tìm theo từ khóa: `ACDOC`, `FINS`, `BCF`, `CARRY` trong mô tả spot/BAdI |
-
-### 7.3 Tìm từ chương trình nghiệp vụ (where-used ngược)
-
-1. Xác định chương trình BCF: `FAGLGVTR` hoặc app **Carry Forward Balances**.
-2. `SE38` / `SE37` → program/class liên quan → **Find** → **Enhancement options** / search `GET BADI` / `CALL BADI`.
-3. Kết quả cho biết **enhancement spot** và **BAdI** được gọi tại runtime.
-
-### 7.4 Khái niệm (SAP)
-
-- **Enhancement spot** — quản trị explicit enhancement options (BAdI + điểm gọi). [[S3]](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html) — mirror: [enhancement spot](sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)
-- BAdI + calling position = **explicit enhancement option** gán vào spot.
+Mục đích khác append field → quay lại quy trình §7.4: *mục đích runtime → transaction → SE84/debug → signature → filter → debug*.
 
 ---
 
@@ -521,6 +628,38 @@ https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — mirror: [s
 ### [S8] SAP Community — Balance Carryforward custom fields (tóm tắt)
 
 https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — mirror: [sources/sap-community/balance-carryforward-custom-fields.md](sources/sap-community/balance-carryforward-custom-fields.md)
+
+### [S9] SAP Library — Enhancement Concept
+
+https://help.sap.com/saphelp_ewm900/helpdata/en/42/d356adddec036fe10000000a114cbd/content.htm
+
+### [S10] ABAP Keyword Documentation — GET BADI
+
+https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html — mirror: [sources/sap-abap-cloud/3008-ABAPGET_BADI.md](sources/sap-abap-cloud/3008-ABAPGET_BADI.md)
+
+### [S11] ABAP Keyword Documentation — CALL BADI
+
+https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html
+
+### [S12] ABAP Keyword Documentation — object plug-in
+
+https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENOBJECT_PLUGIN_GLOSRY.html
+
+### [S13] SAP Support — How to find classic BAdIs
+
+https://help.sap.com/docs/SUPPORT_CONTENT/abaphowto/3353523789.html
+
+### [S14] SAP Support — Find a BADI
+
+https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525647.html
+
+### [S15] SAP Help — Breakpoints (characteristics)
+
+https://help.sap.com/docs/ABAP_PLATFORM_NEW/c238d694b825421f940829321ffa326a/4ec121276e391014adc9fffe4e204223.html
+
+### [S16] SAP Help — Setting dynamic breakpoints (ADT)
+
+https://help.sap.com/docs/abap-cloud/abap-development-tools-user-guide/setting-dynamic-breakpoints
 
 ### Mirror ABAP Cloud trong repo
 
