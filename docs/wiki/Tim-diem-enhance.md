@@ -1,6 +1,6 @@
 # Cách tìm điểm enhance
 
-[← Home](Home.md) · [Hướng dẫn đầy đủ](../docs/Huong_dan_BADI_FINS_ACDOC.md#7-cách-tìm-điểm-để-enhance)
+[← Home](Home.md) · [Hướng dẫn đầy đủ](../Huong_dan_BADI_FINS_ACDOC.md#7-cách-tìm-điểm-để-enhance)
 
 ## Case đã biết BAdI Finance
 
@@ -16,4 +16,4 @@
 
 ## Mirror
 
-[enhancement spot](../docs/sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)
+[enhancement spot](../sources/sap-abap-cloud/4428-ABENENHANCEMENT_SPOT_GLOSRY.md)

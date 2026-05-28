@@ -16,5 +16,5 @@
 
 ## Nguồn mirror
 
-- [FINSC_ACDOC_FCT](../docs/sources/finance/FINSC_ACDOC_FCT.md)
-- [Community BCF custom fields](../docs/sources/sap-community/balance-carryforward-custom-fields.md)
+- [FINSC_ACDOC_FCT](../sources/finance/FINSC_ACDOC_FCT.md)
+- [Community BCF custom fields](../sources/sap-community/balance-carryforward-custom-fields.md)

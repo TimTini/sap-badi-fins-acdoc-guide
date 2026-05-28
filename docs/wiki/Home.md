@@ -1,6 +1,6 @@
 # Wiki — BAdI & Enhancement Framework
 
-Tra cứu nhanh các khái niệm dùng trong [hướng dẫn BADI_FINS_ACDOC_FIELDCAT](../docs/Huong_dan_BADI_FINS_ACDOC.md).
+Tra cứu nhanh các khái niệm dùng trong [hướng dẫn BADI_FINS_ACDOC_FIELDCAT](../Huong_dan_BADI_FINS_ACDOC.md).
 
 ## Xem nhanh (trình duyệt)
 
@@ -24,7 +24,7 @@ Mở **[index.html](index.html)** — trang tổng hợp có link tới từng c
 
 ## Nguồn mirror trong repo
 
-[docs/sources/](../docs/sources/README.md) — ABAP Cloud, KBA 3588343, Community, FINSC_ACDOC_FCT.
+[sources/](../sources/README.md) — ABAP Cloud, KBA 3588343, Community, FINSC_ACDOC_FCT.
 
 ## Nguồn SAP (link gốc)
 
