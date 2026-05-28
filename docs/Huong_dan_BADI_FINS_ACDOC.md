@@ -86,7 +86,7 @@ ZCL_IM_FINS_ACDOC_FCAT
 
 ![Hình 3 — SE19 Enhancement Implementation Active](images/03-se19-enhancement-implementation-zbi-active.png)
 
-> PNG trong `images/` hiện là placeholder — thay bằng screenshot DEV (xem `images/README.md`).
+> Ảnh PNG từ [SAP Help](https://help.sap.com/saphelp_snc70/helpdata/en/44/f518d884056c30e10000000a114a6b/content.htm) và [SAP Community](https://community.sap.com/t5/application-development-and-automation-blog-posts/adding-wrbtr-column-in-the-standard-report-rfumsv00-vat-report/ba-p/13242101) — object ví dụ SAP, không phải `ZBI_*` trên DEV. Nguồn: `images/SOURCES.md`.
 
 ### Các bước
 

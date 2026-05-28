@@ -355,15 +355,15 @@ ZCL_IM_FINS_ACDOC_FCAT</pre>
                 <div class="img-grid">
           <figure class="figure">
             <img src="images/02-se19-new-badi-enhancement-spot.png" alt="SE19 - tao New BAdI implementation theo Enhancement Spot ES_FINS_ACDOCA" loading="lazy" width="1280" />
-            <figcaption>Hình 2 — SE19: chọn <strong>New BAdI</strong>, nhập Enhancement Spot <code class="inline">ES_FINS_ACDOCA</code>. Tham khảo bố cục: <a href="https://community.sap.com/t5/application-development-and-automation-blog-posts/adding-wrbtr-column-in-the-standard-report-rfumsv00-vat-report/ba-p/13242101" target="_blank" rel="noopener">SAP Community — SE19 BAdI</a>.</figcaption>
+            <figcaption>Hình 2 — SE19 tạo implementation (ảnh: <a href="https://community.sap.com/t5/application-development-and-automation-blog-posts/adding-wrbtr-column-in-the-standard-report-rfumsv00-vat-report/ba-p/13242101" target="_blank" rel="noopener">SAP Community</a>, ví dụ <code class="inline">FI_TAX_BADI_014</code>). Trên DEV: chọn <strong>New BAdI</strong>, spot <code class="inline">ES_FINS_ACDOCA</code>.</figcaption>
           </figure>
           <figure class="figure">
             <img src="images/03-se19-enhancement-implementation-zbi-active.png" alt="SE19 - Enhancement Implementation ZEI ZBI class Active" loading="lazy" width="1280" />
-            <figcaption>Hình 3 — SE19: <code class="inline">ZEI_FINS_ACDOCA</code> → <code class="inline">ZBI_FINS_ACDOC_FCAT</code> → <code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code>, có <strong>Active</strong>.</figcaption>
+            <figcaption>Hình 3 — Enhancement implementation + <strong>Implementation is active</strong> (ảnh: <a href="https://help.sap.com/saphelp_snc70/helpdata/en/44/f518d884056c30e10000000a114a6b/content.htm" target="_blank" rel="noopener">SAP Help — How to Implement a BAdI</a>, ví dụ <code class="inline">z_bdi_calc_vat_us</code>).</figcaption>
           </figure>
         </div>
         <div class="alert">
-          <strong>Ảnh placeholder:</strong> các file PNG trong <code class="inline">images/</code> là placeholder — hãy thay bằng screenshot từ hệ DEV (che client, user, transport). Xem <code class="inline">images/README.md</code>.
+          <strong>Ảnh minh họa:</strong> screenshot thật từ <a href="https://help.sap.com/saphelp_snc70/helpdata/en/44/f518d884056c30e10000000a114a6b/content.htm" target="_blank" rel="noopener">SAP Help</a> và <a href="https://community.sap.com/t5/application-development-and-automation-blog-posts/adding-wrbtr-column-in-the-standard-report-rfumsv00-vat-report/ba-p/13242101" target="_blank" rel="noopener">SAP Community</a> — object trên ảnh là <em>ví dụ</em> SAP, không phải <code class="inline">ZBI_FINS_ACDOC_FCAT</code>. Chi tiết: <a href="images/SOURCES.md">images/SOURCES.md</a>. Nên chụp lại trên DEV khi có hệ thống.
         </div>
         <h3>Các bước</h3>
         <ol class="steps">
@@ -386,7 +386,7 @@ ZCL_IM_FINS_ACDOC_FCAT</pre>
 
                 <figure class="figure">
           <img src="images/04-se24-method-parameters-bcf-oi.png" alt="SE24 - method CHANGE_ACTIVE_FIELDS_BCF_OI parameters" loading="lazy" width="1280" />
-          <figcaption>Hình 4 — SE24: method <code class="inline">CHANGE_ACTIVE_FIELDS_BCF_OI</code>, tab Parameters — xác nhận tên CHANGING parameter.</figcaption>
+            <figcaption>Hình 4 — Class Builder / method implementation (ảnh: SAP Community blog trên; trên DEV mở <code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code>, method <code class="inline">CHANGE_ACTIVE_FIELDS_BCF_OI</code>, kiểm tra Parameters).</figcaption>
         </figure>
 
         <h3>Code mẫu</h3>
@@ -416,7 +416,7 @@ ENDMETHOD.</pre>
 
                 <figure class="figure">
           <img src="images/05-se19-deactivate-badi-implementation.png" alt="SE19 - deactivate BAdI implementation ZBI" loading="lazy" width="1280" />
-          <figcaption>Hình 5 — Disable chuẩn: tắt <strong>Active implementation</strong> trên <code class="inline">ZBI_FINS_ACDOC_FCAT</code>. Tham khảo: <a href="https://community.sap.com/t5/application-development-discussions/deactivate-the-badi-implementation/td-p/3276063" target="_blank" rel="noopener">SAP Community — deactivate BAdI</a>.</figcaption>
+          <figcaption>Hình 5 — Bỏ chọn <strong>Implementation is active</strong> trong Runtime Behavior (ảnh: SAP Help cùng bài Hình 3). Thảo luận: <a href="https://community.sap.com/t5/application-development-discussions/deactivate-the-badi-implementation/td-p/3276063" target="_blank" rel="noopener">SAP Community — deactivate BAdI</a>.</figcaption>
         </figure>
 
         <h3>Các bước (ưu tiên)</h3>
@@ -458,7 +458,7 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
 
                 <figure class="figure">
           <img src="images/07-se84-check-badi-implementation.png" alt="SE84 tim BAdI implementation" loading="lazy" width="1280" />
-          <figcaption>Hình 7 (tùy chọn) — SE84: Enhancements → BAdI Implementations, search <code class="inline">ZBI_FINS_ACDOC_FCAT</code>.</figcaption>
+          <figcaption>Hình 7 (tùy chọn) — Object Navigator / enhancement tree (ảnh: SAP Help — Building Your First BAdI). Trên hệ bạn: SE84 → Enhancements → BAdI Implementations → <code class="inline">ZBI_FINS_ACDOC_FCAT</code>.</figcaption>
         </figure>
         <h3>Kiểm tra còn sót <code class="inline">ZBI_*</code></h3>
         <table>
@@ -477,7 +477,7 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
 
                 <figure class="figure">
           <img src="images/06-debug-breakpoint-zcl-im.png" alt="ABAP Debugger breakpoint trong ZCL_IM_FINS_ACDOC_FCAT" loading="lazy" width="1280" />
-          <figcaption>Hình 6 — Đặt breakpoint trong <code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code> trước khi chạy BCF (<code class="inline">FAGLGVTR</code>).</figcaption>
+          <figcaption>Hình 6 — Class Builder mở implementing class (ảnh: SAP Help). Đặt breakpoint trong <code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code> trước BCF (<code class="inline">FAGLGVTR</code>).</figcaption>
         </figure>
 
         <h3>Không debug trong interface</h3>
