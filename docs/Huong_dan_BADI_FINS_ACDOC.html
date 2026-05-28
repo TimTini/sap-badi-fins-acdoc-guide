@@ -207,6 +207,46 @@
       font-size: 13px;
       font-weight: 500;
     }
+    figure.figure {
+      margin: 16px 0;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fafbfd;
+    }
+    figure.figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      background: #fff;
+    }
+    figure.figure figcaption {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    .img-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .visual-banner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .visual-banner img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.3);
+    }
+    @media (max-width: 700px) { .visual-banner { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -237,6 +277,11 @@
           <span class="tag">SE24</span>
           <span class="tag">ACDOCA / BCF</span>
         </div>
+        <div class="visual-banner">
+          <img src="images/02-se19-create.svg" alt="SE19 Create Implementation" width="240" height="134" />
+          <img src="images/03-se19-impl-tree.svg" alt="SE19 implementation tree" width="240" height="120" />
+          <img src="images/05-bcf-flow.svg" alt="BCF flow" width="240" height="67" />
+        </div>
       </header>
 
       <section id="co-ban">
@@ -261,6 +306,11 @@
       <section id="quan-he">
         <h2>1. Quan hệ object trong BAdI</h2>
         <p>Áp vào case <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code>:</p>
+
+        <figure class="figure">
+          <img src="images/01-object-tree.svg" alt="Sơ đồ quan hệ object BAdI Finance" loading="lazy" />
+          <figcaption>Hình 1 — Sơ đồ object (minh họa). Có thể thay file PNG screenshot SE19/SE80 trong thư mục <code class="inline">images/</code>.</figcaption>
+        </figure>
 
         <div class="tree">SAP Standard
 └── Enhancement Spot: ES_FINS_ACDOCA
@@ -302,9 +352,20 @@ Customer Z*
 ZBI_FINS_ACDOC_FCAT
 ZCL_IM_FINS_ACDOC_FCAT</pre>
 
+        <div class="img-grid">
+          <figure class="figure">
+            <img src="images/02-se19-create.svg" alt="SE19 tạo implementation" loading="lazy" />
+            <figcaption>Hình 2 — SE19: New BAdI + Enhancement Spot <code class="inline">ES_FINS_ACDOCA</code></figcaption>
+          </figure>
+          <figure class="figure">
+            <img src="images/03-se19-impl-tree.svg" alt="Cây enhancement implementation" loading="lazy" />
+            <figcaption>Hình 3 — SE19: ZEI → ZBI → class, cờ Active</figcaption>
+          </figure>
+        </div>
+
         <h3>Các bước</h3>
         <ol class="steps">
-          <li>Vào transaction <code class="inline">SE19</code>.</li>
+          <li>Vào transaction <code class="inline">SE19</code> (xem Hình 2).</li>
           <li>Chọn tạo implementation cho <strong>New BAdI</strong> hoặc theo <strong>Enhancement Spot</strong>.</li>
           <li>Nhập enhancement spot: <code class="inline">ES_FINS_ACDOCA</code>.</li>
           <li>Tạo Enhancement Implementation, ví dụ: <code class="inline">ZEI_FINS_ACDOCA</code>.</li>
@@ -320,6 +381,11 @@ ZCL_IM_FINS_ACDOC_FCAT</pre>
           <span class="pill">CHANGE_ACTIVE_FIELDS_BCF_BS — Balance Sheet</span>
           <span class="pill">CHANGE_ACTIVE_FIELDS_BCF_PL — P&amp;L</span>
         </div>
+
+        <figure class="figure">
+          <img src="images/04-se24-methods.svg" alt="SE24 interface methods" loading="lazy" />
+          <figcaption>Hình 4 — SE24: chọn method BCF_OI và kiểm tra CHANGING parameter (không code trong interface)</figcaption>
+        </figure>
 
         <h3>Code mẫu</h3>
         <div class="alert">
@@ -345,6 +411,11 @@ ENDMETHOD.</pre>
 
         <h3>Khi nào dùng?</h3>
         <p>Tắt ảnh hưởng runtime nhưng vẫn giữ object để sửa tiếp hoặc rollback.</p>
+
+        <figure class="figure">
+          <img src="images/03-se19-impl-tree.svg" alt="Tắt Active trên SE19" loading="lazy" />
+          <figcaption>Hình 5 — Disable chuẩn: tắt <strong>Active</strong> trên BAdI implementation (Hình 3)</figcaption>
+        </figure>
 
         <h3>Các bước (ưu tiên)</h3>
         <ol class="steps">
@@ -397,6 +468,11 @@ IF_BADI_FINS_ACDOC_FIELDCAT</pre>
 
       <section id="debug">
         <h2>5. Debug nhanh</h2>
+
+        <figure class="figure">
+          <img src="images/05-bcf-flow.svg" alt="Luồng BCF và BAdI" loading="lazy" />
+          <figcaption>Hình 6 — Luồng test: chạy BCF → BAdI → đặt breakpoint trong <code class="inline">ZCL_IM_*</code></figcaption>
+        </figure>
 
         <h3>Không debug trong interface</h3>
         <p><code class="inline">SE24 → IF_BADI_FINS_ACDOC_FIELDCAT</code> — chỉ là interface.</p>

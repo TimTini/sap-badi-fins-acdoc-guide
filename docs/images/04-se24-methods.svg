@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 320" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="720" height="320" fill="#e8e8e8" rx="8"/>
+  <rect width="720" height="28" fill="#d0d0d0"/>
+  <text x="12" y="19" fill="#333" font-size="12">SE24  Interface IF_BADI_FINS_ACDOC_FIELDCAT</text>
+  <rect x="24" y="48" width="160" height="240" fill="#fff" stroke="#aaa"/>
+  <text x="36" y="80" fill="#666" font-size="11">Methods</text>
+  <text x="48" y="108" fill="#000" font-size="11">CHANGE_ACTIVE_FIELDS_BCF_BS</text>
+  <text x="48" y="132" fill="#000" font-size="11">CHANGE_ACTIVE_FIELDS_BCF_PL</text>
+  <text x="48" y="156" fill="#0f62fe" font-size="11" font-weight="600">CHANGE_ACTIVE_FIELDS_BCF_OI</text>
+  <rect x="200" y="48" width="496" height="240" fill="#f7f7f7" stroke="#aaa"/>
+  <text x="216" y="80" fill="#333" font-size="12" font-weight="600">Parameters  method BCF_OI</text>
+  <text x="216" y="108" fill="#666" font-size="11">CHANGING</text>
+  <text x="216" y="132" fill="#000" font-size="12" font-family="Consolas, monospace">CT_ACTIVE_FIELDS (kiÃm tra tên th­t)</text>
+  <text x="216" y="168" fill="#c00" font-size="11">Không vi¿t code trong interface</text>
+  <text x="216" y="192" fill="#198038" font-size="11">Code trong ZCL_IM_* ’ SE24 class</text>
+</svg>

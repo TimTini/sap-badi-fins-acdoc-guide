@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="720" height="400" fill="#e8e8e8" rx="8"/>
+  <rect x="0" y="0" width="720" height="28" fill="#d0d0d0"/>
+  <text x="12" y="19" fill="#333" font-size="12">SE19  Business Add-Ins: Implementations</text>
+  <rect x="40" y="56" width="640" height="300" fill="#f7f7f7" stroke="#999" rx="4"/>
+  <text x="60" y="88" fill="#000" font-size="14" font-weight="600">Create Implementation</text>
+  <circle cx="76" cy="118" r="8" fill="#fff" stroke="#333"/><circle cx="76" cy="118" r="4" fill="#0f62fe"/>
+  <text x="96" y="123" fill="#000" font-size="13">New BAdI</text>
+  <circle cx="76" cy="148" r="8" fill="#fff" stroke="#333"/>
+  <text x="96" y="153" fill="#666" font-size="13">Classic BAdI</text>
+  <text x="60" y="188" fill="#333" font-size="12">Enhancement Spot</text>
+  <rect x="60" y="196" width="280" height="26" fill="#fff" stroke="#666"/>
+  <text x="68" y="214" fill="#000" font-size="13" font-family="Consolas, monospace">ES_FINS_ACDOCA</text>
+  <rect x="480" y="280" width="120" height="32" fill="#0f62fe" rx="4"/>
+  <text x="508" y="301" fill="#fff" font-size="13">Create Impl.</text>
+  <text x="60" y="340" fill="#5c6b82" font-size="11">Minh hÕa  thay b±ng screenshot SE19 trÍn h« th—ng DEV</text>
+</svg>
