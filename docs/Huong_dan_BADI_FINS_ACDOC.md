@@ -145,6 +145,8 @@ Kết quả pass tối thiểu trên `SE19` / `SE24` / `FAGLGVTR`:
 - SAP KBA 3588343 preview: https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — dùng để xác minh triệu chứng ACDOCA extended items blank sau BCF và keyword `BADI_FINS_ACDOC_FIELDCAT` / `CHANGE_ACTIVE_FIELDS_BCF_OI`; mirror [KBA-3588343](sources/sap-kba/KBA-3588343.md).
 - SAP Help — Balance Carryforward in G/L Accounting: https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/651d8af3ea974ad1a4d74449122c620e/9691b2a7afdf4b7ab15b3c57c6c89f2c.html — dùng để xác minh BAdI `BADI_FINS_ACDOC_FIELDCAT`, enhancement spot `ES_FINS_ACDOCA`, field catalog cho BCF, và cách chạy/schedule BCF.
 - SAP Help — Carry Forward Balances app: https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE_UPA/e55549ee96814207af9232a7688dd64a/65810e56a686fb37e10000000a44147b.html?version=2022.3_UPA — dùng để xác minh app liên quan, `FAGLGVTR`, và lưu ý deprecated theo release.
+- SAP Help — Report Transactions: https://help.sap.com/saphelp_em92/helpdata/en/43/0f4c879f2d6f41e10000000a422035/content.htm — dùng để xác minh transaction code có thể được gán với executable program và selection screen qua `SE93`.
+- SAP Help — Balance carried forward for an account is not equal with the previous year-end balance: https://help.sap.com/docs/SUPPORT_CONTENT/fiaccounting/3361881370.html — dùng để xác minh `FAGLGVTR` / `SAPFGVTR` trong nội dung support về Balance Carryforward.
 - SAP ABAP — BAdI glossary: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html — dùng để xác minh BAdI gồm interface, filter và setting.
 - SAP ABAP — ABAP Enhancements: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html — dùng để xác minh BAdI cho phép enhance ABAP source mà không modify source gốc.
 - SAP ABAP — Enhancements Using BAdIs: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html — dùng để xác minh enhancement spot, implementation class, `GET BADI`, `CALL BADI`, single/multiple use và fallback class.
@@ -153,6 +155,8 @@ Kết quả pass tối thiểu trên `SE19` / `SE24` / `FAGLGVTR`:
 - SAP ABAP — BAdI implementation class: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html — dùng để xác minh implementation class implement BAdI interface và instance hoạt động như object plug-in.
 - SAP ABAP — GET BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html — dùng để xác minh exception `CX_BADI_NOT_IMPLEMENTED` và `CX_BADI_MULTIPLY_IMPLEMENTED`.
 - SAP ABAP — CALL BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html — dùng để xác minh cách runtime gọi BAdI methods.
+- SAP Help — Breakpoints at Statements: https://help.sap.com/saphelp_em900/helpdata/en/49/26e11dc93016b8e10000000a42189d/content.htm — dùng để xác minh breakpoint dynamic theo ABAP statement trong Debugger.
+- SAP Help Support Content — What BAdI is and how to find and implement it: https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525767.html — dùng để tham khảo cách đặt breakpoint `CALL BADI` và `CL_EXITHANDLER` khi tìm BAdI.
 - SAP Community — BCF custom fields: https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — nguồn cộng đồng, chỉ dùng tham khảo hạn chế Public Cloud; mirror [Community](sources/sap-community/balance-carryforward-custom-fields.md).
 - Mirror ABAP Cloud trong repo: [sources/sap-abap-cloud/](sources/sap-abap-cloud/) — dùng để đọc bản mirror nội bộ của ABAP Keyword Documentation.
 
@@ -314,6 +318,23 @@ Dành khi cần tìm BAdI khác ngoài case ACDOCA/BCF:
 6. Debug xác nhận BAdI thực sự được gọi.
 
 Case `BADI_FINS_ACDOC_FIELDCAT`: tìm nhanh qua `SE19` (`ES_FINS_ACDOCA`), `SE24` (`IF_BADI_FINS_ACDOC_FIELDCAT`), where-used, keyword `ACDOC` / `BCF` / `FINS` trên `SE84`.
+
+### Ví dụ: tìm enhancement spot từ T-code `FAGLGVTR`
+
+**Mục tiêu:** từ T-code `FAGLGVTR`, tìm BAdI/enhancement spot có thể ảnh hưởng field catalog của Balance Carryforward.
+
+**Kết luận đã có nguồn SAP:** với case field catalog cho Balance Carryforward, SAP Help nêu trực tiếp BAdI `BADI_FINS_ACDOC_FIELDCAT` thuộc enhancement spot `ES_FINS_ACDOCA`. SAP KBA 3588343 preview nêu keyword `CHANGE_ACTIVE_FIELDS_BCF_OI` cho lỗi ACDOCA extended items blank sau BCF.
+
+**Luồng thao tác đề xuất:**
+
+1. Mở `SE93` → nhập `FAGLGVTR` → **Display**. Ghi lại loại transaction, program và selection screen. Trên nhiều hệ, nguồn SAP Support Content ghi `FAGLGVTR` chạy program `SAPFGVTR`; vẫn phải xác nhận bằng `SE93` trên hệ của bạn.
+2. Mở `SE38` hoặc `SE80` → program vừa ghi nhận, ví dụ `SAPFGVTR`. Search trong program/include theo các keyword: `GET BADI`, `CALL BADI`, `BADI_FINS_ACDOC_FIELDCAT`, `ES_FINS_ACDOCA`, `ACDOC`, `FIELDCAT`, `BCF`.
+3. Nếu không thấy hit trực tiếp, mở package của program trong `SE80`/`SE84`; vào **Enhancements** → **BAdI Definitions** / **Enhancement Spots**. Dùng package thật trên hệ; không copy package từ tài liệu nếu `SE93` / `SE38` hiển thị khác.
+4. Debug runtime: chạy `/h` rồi execute `FAGLGVTR` ở **test mode** hoặc với phạm vi nhỏ. Trong Debugger, đặt **Breakpoint at Statement** cho `GET BADI` và `CALL BADI`. Nếu nghi classic BAdI, đặt breakpoint ở `CL_EXITHANDLER=>GET_INSTANCE`.
+5. Khi debugger dừng ở `GET BADI` / `CALL BADI`, ghi lại tên BAdI, filter value nếu có, include/class đang chạy và call stack. Từ tên BAdI, mở `SE18` / `SE19` để xem enhancement spot và implementation hiện có.
+6. Với case này, kết quả kỳ vọng cần đối chiếu là `BADI_FINS_ACDOC_FIELDCAT` / `ES_FINS_ACDOCA`. Sau đó mở `SE24` → `IF_BADI_FINS_ACDOC_FIELDCAT` để xác nhận method BCF và parameter thật trước khi viết code.
+
+**Không kết luận quá rộng:** một T-code có thể có nhiều nhánh xử lý. Danh sách tìm bằng `SE84` là ứng viên; chỉ BAdI dừng trong debug hoặc có nguồn SAP Help/KBA đúng nghiệp vụ mới nên xem là liên quan trực tiếp tới flow đang test.
 
 ### Lỗi thường gặp trong phụ lục kỹ thuật
 
