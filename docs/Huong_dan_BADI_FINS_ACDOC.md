@@ -325,11 +325,23 @@ Case `BADI_FINS_ACDOC_FIELDCAT`: tìm nhanh qua `SE19` (`ES_FINS_ACDOCA`), `SE24
 
 **Kết luận đã có nguồn SAP:** với case field catalog cho Balance Carryforward, SAP Help nêu trực tiếp BAdI `BADI_FINS_ACDOC_FIELDCAT` thuộc enhancement spot `ES_FINS_ACDOCA`. SAP KBA 3588343 preview nêu keyword `CHANGE_ACTIVE_FIELDS_BCF_OI` cho lỗi ACDOCA extended items blank sau BCF.
 
+**Nguồn internet để đối chiếu từng bước:**
+
+| Điểm cần xác minh | Kết luận dùng trong ví dụ | Nguồn internet |
+|-------------------|---------------------------|----------------|
+| T-code có thể map tới program/selection screen | SAP Help mô tả report transaction gán transaction code với executable program và selection screen; dùng `SE93` để kiểm trên hệ thật | [SAP Help — Report Transactions](https://help.sap.com/saphelp_em92/helpdata/en/43/0f4c879f2d6f41e10000000a422035/content.htm) |
+| `FAGLGVTR` liên quan program nào | SAP Support Content có ví dụ support ghi `FAGLGVTR` / `SAPFGVTR`; vẫn phải xác nhận `SE93` trên hệ của bạn | [SAP Support Content — Balance carried forward](https://help.sap.com/docs/SUPPORT_CONTENT/fiaccounting/3361881370.html) |
+| Debug theo statement | SAP Help mô tả dynamic breakpoint trước ABAP statement; dùng để đặt breakpoint `GET BADI` / `CALL BADI` | [SAP Help — Breakpoints at Statements](https://help.sap.com/saphelp_em900/helpdata/en/49/26e11dc93016b8e10000000a42189d/content.htm) |
+| Tìm BAdI bằng runtime/debug | SAP Support Content hướng dẫn đặt breakpoint với `CL_EXITHANDLER` cho classic BAdI và `CALL BADI` cho new BAdI | [SAP Help Support Content — What BAdI is and how to find and implement it](https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525767.html) |
+| Tìm BAdI definition theo package | SAP Support Content nêu đường `SE84` → BAdI definitions → Package (Development Class) → BAdI definition name | [SAP Help Support Content — What BAdI is and how to find and implement it](https://help.sap.com/docs/SUPPORT_CONTENT/abap/3353525767.html) |
+| BAdI/spot đúng cho field catalog BCF | SAP Help nêu `BADI_FINS_ACDOC_FIELDCAT` thuộc `ES_FINS_ACDOCA` dùng để modify field catalog type cho Balance Carryforward | [SAP Help — Balance Carryforward in G/L Accounting](https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/651d8af3ea974ad1a4d74449122c620e/9691b2a7afdf4b7ab15b3c57c6c89f2c.html) |
+| Triệu chứng ACDOCA blank sau BCF | SAP KBA preview nêu symptom ACDOCA extended items blank after balance carryforward và keyword `BADI_FINS_ACDOC_FIELDCAT`, `CHANGE_ACTIVE_FIELDS_BCF_OI` | [SAP KBA 3588343 preview](https://userapps.support.sap.com/sap/support/knowledge/en/3588343) |
+
 **Luồng thao tác đề xuất:**
 
 1. Mở `SE93` → nhập `FAGLGVTR` → **Display**. Ghi lại loại transaction, program và selection screen. Trên nhiều hệ, nguồn SAP Support Content ghi `FAGLGVTR` chạy program `SAPFGVTR`; vẫn phải xác nhận bằng `SE93` trên hệ của bạn.
 2. Mở `SE38` hoặc `SE80` → program vừa ghi nhận, ví dụ `SAPFGVTR`. Search trong program/include theo các keyword: `GET BADI`, `CALL BADI`, `BADI_FINS_ACDOC_FIELDCAT`, `ES_FINS_ACDOCA`, `ACDOC`, `FIELDCAT`, `BCF`.
-3. Nếu không thấy hit trực tiếp, mở package của program trong `SE80`/`SE84`; vào **Enhancements** → **BAdI Definitions** / **Enhancement Spots**. Dùng package thật trên hệ; không copy package từ tài liệu nếu `SE93` / `SE38` hiển thị khác.
+3. Nếu không thấy hit trực tiếp, lấy package/development class của program trong `SE80`; vào `SE84` → **BAdI definitions** → lọc theo package. Sau khi tìm được BAdI definition, mở `SE18` / `SE19` để xem enhancement spot. Dùng package thật trên hệ; không copy package từ tài liệu nếu `SE93` / `SE38` hiển thị khác.
 4. Debug runtime: chạy `/h` rồi execute `FAGLGVTR` ở **test mode** hoặc với phạm vi nhỏ. Trong Debugger, đặt **Breakpoint at Statement** cho `GET BADI` và `CALL BADI`. Nếu nghi classic BAdI, đặt breakpoint ở `CL_EXITHANDLER=>GET_INSTANCE`.
 5. Khi debugger dừng ở `GET BADI` / `CALL BADI`, ghi lại tên BAdI, filter value nếu có, include/class đang chạy và call stack. Từ tên BAdI, mở `SE18` / `SE19` để xem enhancement spot và implementation hiện có.
 6. Với case này, kết quả kỳ vọng cần đối chiếu là `BADI_FINS_ACDOC_FIELDCAT` / `ES_FINS_ACDOCA`. Sau đó mở `SE24` → `IF_BADI_FINS_ACDOC_FIELDCAT` để xác nhận method BCF và parameter thật trước khi viết code.
