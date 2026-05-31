@@ -1,6 +1,6 @@
 # Wiki — BAdI & Enhancement Framework
 
-Tra cứu nhanh các khái niệm dùng trong [hướng dẫn BADI_FINS_ACDOC_FIELDCAT](../Huong_dan_BADI_FINS_ACDOC.md).
+Tra cứu nhanh các khái niệm dùng trong tài liệu nhóm. **Đọc trước:** [Giới thiệu BAdI](../Gioi_thieu_BADI.md) → [case ACDOCA / BCF](../Huong_dan_BADI_FINS_ACDOC.md).
 
 ## Xem nhanh (trình duyệt)
 

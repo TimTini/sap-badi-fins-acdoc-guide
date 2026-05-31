@@ -1,5 +1,5 @@
 /**
- * Build docs/Huong_dan_BADI_FINS_ACDOC.html from Markdown.
+ * Build HTML guides from Markdown.
  * Run: node docs/scripts/build-guide-html.mjs
  */
 import fs from "node:fs";
@@ -8,9 +8,34 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const docsDir = path.resolve(__dirname, "..");
-const mdPath = path.join(docsDir, "Huong_dan_BADI_FINS_ACDOC.md");
-const htmlPath = path.join(docsDir, "Huong_dan_BADI_FINS_ACDOC.html");
-const stylePath = path.join(docsDir, "Huong_dan_BADI_FINS_ACDOC.html.bak-20260529-000615");
+const styleSource = path.join(docsDir, "Huong_dan_BADI_FINS_ACDOC.html");
+
+const DOC_CONFIGS = [
+  {
+    md: "Gioi_thieu_BADI.md",
+    html: "Gioi_thieu_BADI.html",
+    heroSubtitle:
+      "Khái niệm BAdI, các object Enhancement Framework, và hướng dẫn tạo BAdI implementation (SE19/SE80) — tóm tắt từ SAP Help.",
+    tags: ["Enhancement Framework", "BAdI", "Đọc trước"],
+    footerNote:
+      "Nội dung trích SAP ABAP Keyword Documentation (Cloud). Thao tác transaction: xác minh trên SAP Help Portal theo release hệ thống.",
+    tocExtra: [
+      { href: "Huong_dan_BADI_FINS_ACDOC.html", label: "Tiếp theo: case ACDOCA / BCF" },
+    ],
+  },
+  {
+    md: "Huong_dan_BADI_FINS_ACDOC.md",
+    html: "Huong_dan_BADI_FINS_ACDOC.html",
+    heroSubtitle:
+      "Hiện tượng custom field ACDOCA trống sau Balance Carryforward sau upgrade S/4HANA — nguyên nhân, hướng xử lý BAdI BADI_FINS_ACDOC_FIELDCAT, cách kiểm tra.",
+    tags: ["S/4HANA Finance", "Balance Carryforward", "ACDOCA"],
+    footerNote:
+      "Object/method phụ thuộc release Finance — xác nhận trên hệ DEV trước transport QA/PRD.",
+    tocExtra: [
+      { href: "Gioi_thieu_BADI.html", label: "← Giới thiệu BAdI" },
+    ],
+  },
+];
 
 function slugify(text) {
   return text
@@ -223,11 +248,7 @@ function parseMd(md) {
         sections.push(current);
       }
       const heading = line.slice(3).trim();
-      current = {
-        heading,
-        id: slugify(heading),
-        lines: [],
-      };
+      current = { heading, id: slugify(heading), lines: [] };
       i += 1;
       continue;
     }
@@ -242,10 +263,13 @@ function parseMd(md) {
   return { title, sections };
 }
 
-function buildToc(sections) {
-  const appendixId = slugify("Phụ lục kỹ thuật");
+function buildToc(sections, config) {
   const mainId = slugify("Nội dung chính");
+  const appendixId = slugify("Phụ lục kỹ thuật");
   let html = '<nav class="toc" aria-label="Mục lục"><h2>Mục lục</h2>';
+  for (const extra of config.tocExtra ?? []) {
+    html += `<a href="${escapeHtml(extra.href)}">${escapeHtml(extra.label)}</a>`;
+  }
   for (const sec of sections) {
     html += `<a href="#${sec.id}">${escapeHtml(sec.heading)}</a>`;
     if (sec.id === mainId || sec.id === appendixId) {
@@ -258,7 +282,7 @@ function buildToc(sections) {
     }
   }
   html += '<a href="sources/README.md">Mirror nguồn SAP</a>';
-  html += '<a href="Huong_dan_BADI_FINS_ACDOC.md">Bản Markdown</a>';
+  html += `<a href="${escapeHtml(config.md)}">Bản Markdown</a>`;
   html += "</nav>";
   return html;
 }
@@ -268,14 +292,15 @@ function extractStyles(oldHtml) {
   return m ? m[1] : "";
 }
 
-function buildHero(title) {
+function buildHero(title, config) {
+  const tags = (config.tags ?? [])
+    .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
+    .join("\n          ");
   return `<header class="hero">
         <h1>${escapeHtml(title)}</h1>
-        <p>Hiện tượng custom field <code class="inline" style="background:rgba(255,255,255,.2);color:#fff">ACDOCA</code> trống sau Balance Carryforward sau upgrade S/4HANA — nguyên nhân, hướng xử lý BAdI <code class="inline" style="background:rgba(255,255,255,.2);color:#fff">BADI_FINS_ACDOC_FIELDCAT</code>, cách kiểm tra.</p>
+        <p>${escapeHtml(config.heroSubtitle)}</p>
         <div class="tags">
-          <span class="tag">S/4HANA Finance</span>
-          <span class="tag">Balance Carryforward</span>
-          <span class="tag">ACDOCA</span>
+          ${tags}
         </div>
       </header>`;
 }
@@ -294,11 +319,10 @@ function buildMain(sections) {
   return html;
 }
 
-function buildPage(md, oldHtml) {
+function buildPage(md, config, styles) {
   const { title, sections } = parseMd(md);
-  const styles = extractStyles(oldHtml);
-  const toc = buildToc(sections);
-  const hero = buildHero(title);
+  const toc = buildToc(sections, config);
+  const hero = buildHero(title, config);
   const main = buildMain(sections);
 
   return `<!DOCTYPE html>
@@ -318,7 +342,7 @@ function buildPage(md, oldHtml) {
       ${hero}
       ${main}
       <footer class="note" style="padding:16px 0;font-size:14px;color:var(--muted)">
-        <p>Object/method phụ thuộc release Finance — xác nhận trong <code class="inline">SE19</code>/<code class="inline">SE24</code> trước transport QA/PRD. Tạo HTML: <code class="inline">node docs/scripts/build-guide-html.mjs</code></p>
+        <p>${escapeHtml(config.footerNote)} Tạo HTML: <code class="inline">node docs/scripts/build-guide-html.mjs</code></p>
       </footer>
     </main>
   </div>
@@ -327,14 +351,13 @@ function buildPage(md, oldHtml) {
 `;
 }
 
-const md = fs.readFileSync(mdPath, "utf8");
-let oldHtml = "";
-if (fs.existsSync(htmlPath)) {
-  oldHtml = fs.readFileSync(htmlPath, "utf8");
-} else if (fs.existsSync(stylePath)) {
-  oldHtml = fs.readFileSync(stylePath, "utf8");
-}
+const styles = extractStyles(fs.readFileSync(styleSource, "utf8"));
 
-const out = buildPage(md, oldHtml);
-fs.writeFileSync(htmlPath, out, "utf8");
-console.log("Wrote", htmlPath);
+for (const config of DOC_CONFIGS) {
+  const mdPath = path.join(docsDir, config.md);
+  const htmlPath = path.join(docsDir, config.html);
+  const md = fs.readFileSync(mdPath, "utf8");
+  const out = buildPage(md, config, styles);
+  fs.writeFileSync(htmlPath, out, "utf8");
+  console.log("Wrote", htmlPath);
+}

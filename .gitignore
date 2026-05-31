@@ -2,3 +2,7 @@
 Thumbs.db
 *.backup*
 *~
+*.bak
+*.bak-*
+backup/
+**/backup/

@@ -14,9 +14,27 @@ Mục tiêu của tài liệu là giúp người đọc hiểu:
 
 Giải pháp đề xuất là sử dụng BAdI do SAP cung cấp (`BADI_FINS_ACDOC_FIELDCAT`, enhancement spot `ES_FINS_ACDOCA`) để bổ sung custom field vào danh sách field được xử lý trong Balance Carryforward. Cách làm này **không sửa trực tiếp** SAP standard object, mà thực hiện thông qua **customer enhancement**.
 
-Chi tiết thao tác `SE19` / `SE24`, code mẫu, debug và rollback nằm ở [Phụ lục kỹ thuật](#phụ-lục-kỹ-thuật) — dành cho đội kỹ thuật SAP/ABAP.
+Chi tiết thao tác `SE19` / `SE24`, code mẫu, debug và rollback nằm ở [Phụ lục kỹ thuật](#phu-luc-ky-thuat) — dành cho đội kỹ thuật SAP/ABAP.
 
----
+Chưa quen BAdI? Đọc trước [Giới thiệu BAdI](Gioi_thieu_BADI.md).
+
+## Khi dùng
+
+Dùng tài liệu này khi gặp một trong các tình huống sau:
+
+- Sau upgrade S/4HANA, custom field trên `ACDOCA` có giá trị ở năm cũ nhưng bị trống ở dữ liệu năm mới sau Balance Carryforward.
+- Lỗi xảy ra khi chạy `FAGLGVTR`, job Balance Carryforward trong **Schedule General Ledger Jobs**, hoặc app **Carry Forward Balances** trên release còn hỗ trợ app này.
+- Cần kiểm tra BAdI `BADI_FINS_ACDOC_FIELDCAT` / enhancement spot `ES_FINS_ACDOCA` để bổ sung field vào field catalog dùng cho BCF.
+
+Không dùng tài liệu này để xử lý field chưa tồn tại trên `ACDOCA`, sai cấu hình master data G/L, hoặc sai logic retained earnings. Các lỗi đó cần kiểm tra cấu hình Finance trước.
+
+## Điều kiện trước khi làm
+
+- Có hệ **DEV** hoặc sandbox để tạo và test object `Z*`; không làm thẳng trên **PRD**.
+- User có quyền `SE19`, `SE24`, và quyền chạy/test Balance Carryforward (`FAGLGVTR` hoặc job/app tương ứng theo release).
+- Biết technical field name thật trên `ACDOCA`, ví dụ `ZZBRANCH`; kiểm tra bằng `SE11`, `SE16N`, hoặc công cụ được phép trong dự án.
+- Đã xác nhận field cần được carry forward cho loại tài khoản liên quan: open item, Balance Sheet, hoặc P&L.
+- Trước khi viết code, mở `SE24` → interface `IF_BADI_FINS_ACDOC_FIELDCAT` → method BCF → tab **Parameters** để lấy đúng tên CHANGING parameter trên hệ thực tế.
 
 ## Nội dung chính
 
@@ -28,11 +46,9 @@ Triệu chứng thường gặp:
 
 - Dòng item năm trước vẫn hiển thị giá trị custom field.
 - Sau BCF, dòng năm mới hoặc số dư đầu kỳ không còn giá trị field đó.
-- Lỗi hay gặp với dữ liệu tạo từ chương trình `FAGLGVTR` hoặc app **Carry Forward Balances**.
+- Lỗi hay gặp với dữ liệu tạo từ `FAGLGVTR`, job Balance Carryforward, hoặc app **Carry Forward Balances** trên release còn hỗ trợ app này.
 
 SAP mô tả triệu chứng tương tự trong [KBA 3588343](https://userapps.support.sap.com/sap/support/knowledge/en/3588343) (extended items trên ACDOCA blank sau balance carryforward dù trước upgrade vẫn có giá trị). Mirror nội bộ: [KBA-3588343](sources/sap-kba/KBA-3588343.md).
-
----
 
 ### Nguyên nhân tổng quan
 
@@ -42,20 +58,16 @@ Nguyên nhân không phải “mất dữ liệu năm cũ” mà là **luồng B
 
 Trên hệ thống cần kiểm tra thêm customizing field (ví dụ `FINSC_ACDOC_FCT`) — xem [tóm tắt FINSC_ACDOC_FCT](sources/finance/FINSC_ACDOC_FCT.md).
 
----
+### Đối chiếu nguồn SAP
 
-### Khi nào cần áp dụng giải pháp này?
-
-Áp dụng giải pháp này khi gặp các tình huống sau:
-
-- Sau khi upgrade S/4HANA, custom field trên `ACDOCA` bị trống ở dữ liệu năm mới.
-- Dữ liệu năm cũ vẫn có giá trị, nhưng sau khi chạy Balance Carryforward thì custom field không được kế thừa.
-- Lỗi xảy ra với dữ liệu được tạo từ chương trình `FAGLGVTR` hoặc app **Carry Forward Balances**.
-- Cần bổ sung custom field vào danh sách field được xử lý trong quá trình carryforward.
-
-**Không** áp dụng khi field chưa tồn tại trên `ACDOCA` hoặc chưa được cấu hình đúng trong customizing — cần xử lý cấu hình field trước.
-
----
+| Claim trong tài liệu | Kết luận đối chiếu | Nguồn |
+|----------------------|--------------------|-------|
+| BAdI `BADI_FINS_ACDOC_FIELDCAT` thuộc enhancement spot `ES_FINS_ACDOCA` có thể dùng để chỉnh field catalog cho Balance Carryforward | **Đúng**; SAP Help xác nhận | [Balance Carryforward in G/L Accounting](https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/651d8af3ea974ad1a4d74449122c620e/9691b2a7afdf4b7ab15b3c57c6c89f2c.html) |
+| Sau upgrade, ACDOCA extended items blank sau balance carryforward | **Đúng**; SAP KBA preview xác nhận, bản đầy đủ cần SAP for Me | [KBA 3588343](https://userapps.support.sap.com/sap/support/knowledge/en/3588343) |
+| `CHANGE_ACTIVE_FIELDS_BCF_OI` liên quan open-item-managed accounts | **Đúng theo keyword KBA preview** | [KBA 3588343](https://userapps.support.sap.com/sap/support/knowledge/en/3588343) |
+| `CHANGE_ACTIVE_FIELDS_BCF_BS` / `CHANGE_ACTIVE_FIELDS_BCF_PL` và tên parameter cụ thể | **Cần xác minh trên `SE24` theo release**; không copy code nếu signature khác | `SE24` → `IF_BADI_FINS_ACDOC_FIELDCAT` |
+| `FINSC_ACDOC_FCT` là field catalog cho `ACDOCA` | **Cần xác minh bằng DDIC trên hệ DEV**; repo chỉ có tóm tắt nội bộ | `SE11` / `SE16N` → `FINSC_ACDOC_FCT` |
+| App **Carry Forward Balances** | **Phụ thuộc release**; SAP Help cho biết app đã deprecated ở SAP S/4HANA 2022, có thể dùng `FAGLGVTR` hoặc Schedule General Ledger Jobs | [Carry Forward Balances](https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE_UPA/e55549ee96814207af9232a7688dd64a/65810e56a686fb37e10000000a44147b.html?version=2022.3_UPA) |
 
 ### Hướng xử lý
 
@@ -82,44 +94,73 @@ Tóm tắt phương án:
 | **Vận hành** | Cần **activate** implementation và **transport** đầy đủ chain object từ DEV → QA → PRD. Thiếu transport → hành vi khác giữa môi trường. |
 | **Balance Carryforward** | Field được khai báo qua BAdI sẽ nằm trong active fields khi chạy BCF — ảnh hưởng số dư đầu kỳ / line item năm mới. |
 | **Performance BCF** | Chỉ bổ sung field thật sự cần; append nhiều field không dùng có thể tăng khối lượng xử lý BCF. |
-| **Public Cloud** | Custom field BCF có thể bị giới hạn extensibility — xem [tóm tắt Community](sources/sap-community/balance-carryforward-custom-fields.md). |
+| **Public Cloud** | Custom field BCF có thể bị giới hạn extensibility. Nguồn hiện có trong repo là SAP Community, không phải SAP Help chính thức — xem [tóm tắt Community](sources/sap-community/balance-carryforward-custom-fields.md). |
 
-Chương trình / app thường dùng để kiểm tra: `FAGLGVTR`, **Carry Forward Balances**, **Display Line Items** (GL).
+Chương trình / app thường dùng để kiểm tra: `FAGLGVTR`, job Balance Carryforward trong **Schedule General Ledger Jobs**, **Balance Carryforward Status**, và **Display Line Items** (GL). Nếu hệ còn app **Carry Forward Balances**, kiểm tra trạng thái hỗ trợ theo release trước khi hướng dẫn end user dùng app này.
 
----
+## Bước làm
 
-## Kiểm tra / Cách xác minh
+Luồng dưới đây là checklist tổng quan cho người mới. Chi tiết màn hình `SE19` / `SE24` nằm ở [Phụ lục kỹ thuật](#phu-luc-ky-thuat).
 
-1. Trên **DEV** hoặc **QA**, chạy lại **Balance Carryforward** (`FAGLGVTR` hoặc app **Carry Forward Balances**) cho company code / fiscal year liên quan.
+1. Trên **DEV** hoặc **QA**, lấy một ví dụ lỗi: company code, ledger, fiscal year, G/L account, document/line item, và technical field trên `ACDOCA`.
+2. So sánh dữ liệu `ACDOCA` năm cũ và năm mới cho cùng field custom. Nếu năm cũ có giá trị nhưng năm mới blank sau BCF, ghi lại bằng chứng trước khi sửa.
+3. Kiểm tra field có tồn tại trong `ACDOCA` bằng `SE11` hoặc `SE16N`. Nếu field chưa tồn tại, dừng hướng BAdI và xử lý extension field trước.
+4. Mở `SE24` → `IF_BADI_FINS_ACDOC_FIELDCAT` → xác định method BCF cần dùng và CHANGING parameter thật. Không giả định tên parameter từ tài liệu này.
+5. Mở `SE19` → tạo implementation cho **New BAdI** theo enhancement spot `ES_FINS_ACDOCA`.
+6. Tạo object customer `Z*`: enhancement implementation `ZEI_*`, BAdI implementation `ZBI_*`, implementation class `ZCL_IM_*`.
+7. Trong implementation class, thêm technical field name vào active field list của method BCF tương ứng. Với open item, KBA 3588343 preview nêu keyword `CHANGE_ACTIVE_FIELDS_BCF_OI`.
+8. Activate class, BAdI implementation và enhancement implementation.
+9. Chạy lại Balance Carryforward bằng `FAGLGVTR` hoặc job/app tương ứng theo release, rồi kiểm tra lại `ACDOCA` / **Display Line Items**.
+10. Nếu DEV pass, transport đủ chain object `ZEI_*` / `ZBI_*` / `ZCL_*` sang QA; test lại trước khi đưa PRD.
+
+## Kiểm tra
+
+1. Trên **DEV** hoặc **QA**, chạy lại **Balance Carryforward** bằng `FAGLGVTR`, job trong **Schedule General Ledger Jobs**, hoặc app **Carry Forward Balances** nếu release còn hỗ trợ app này.
 2. Mở dữ liệu `ACDOCA` hoặc report **Display Line Items** (G/L) cho năm mới.
 3. Xác nhận custom field **không còn trống** trên dòng/số dư sau BCF (so với cùng tài khoản trước khi sửa).
 4. Nếu có nhiều loại tài khoản (open item, Balance Sheet, P&L), kiểm tra từng scenario tương ứng method BCF đã implement.
 
-Checklist kỹ thuật chi tiết: [Phụ lục — Kiểm tra sau thao tác](#kiem-tra-cach-xac-minh-phu-luc).
+Checklist kỹ thuật chi tiết nằm ở [Phụ lục — Kiểm tra sau thao tác](#kiem-tra-cach-xac-minh-phu-luc); dùng khi cần đối chiếu `SE19`, `SE24`, transport và trạng thái active.
 
----
+Kết quả pass tối thiểu trên `SE19` / `SE24` / `FAGLGVTR`:
+
+- `SE19` hiển thị BAdI implementation `ZBI_*` ở trạng thái **active**.
+- `SE24` hiển thị method trong class `ZCL_IM_*` đã activate.
+- Sau BCF, field custom có giá trị ở line item / số dư năm mới đúng scenario test.
+- Không có short dump hoặc exception BAdI trong job/app BCF.
+
+## Lỗi thường gặp
+
+| Triệu chứng | Nguyên nhân thường gặp | Cách kiểm tra / xử lý |
+|-------------|------------------------|------------------------|
+| Custom field `ACDOCA` vẫn blank sau BCF | Sai method BCF hoặc field chưa được thêm vào active fields | Kiểm tra `SE24` → `IF_BADI_FINS_ACDOC_FIELDCAT`; chạy lại BCF trên cùng company code / fiscal year |
+| Breakpoint không dừng | Đặt breakpoint ở interface thay vì implementation class; user/job khác | Đặt breakpoint trong `ZCL_IM_*`; với background job dùng `SM37` → `JDBG` |
+| `CX_BADI_NOT_IMPLEMENTED` | BAdI single-use không có implementation active | Kiểm tra `SE19` → active flag; xem nguồn `GET BADI` |
+| `CX_BADI_MULTIPLY_IMPLEMENTED` | BAdI single-use nhưng có nhiều implementation active | Chỉ để một implementation active hoặc kiểm tra filter |
+| Syntax error khi activate class | Tên CHANGING parameter hoặc cấu trúc table khác code mẫu | Mở `SE24` → tab **Parameters**; sửa code theo signature thật |
+| QA/PRD khác DEV | Thiếu transport hoặc object inactive | Transport đủ `ZEI_*`, `ZBI_*`, `ZCL_*`; activate lại trên target |
 
 ## Link nguồn
 
-- SAP KBA 3588343 — ACDOCA extended items blank sau BCF: https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — mirror [KBA-3588343](sources/sap-kba/KBA-3588343.md)
-- SAP Help — Balance Carryforward in G/L Accounting (BAdI field catalog): https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/651d8af3ea974ad1a4d74449122c620e/9691b2a7afdf4b7ab15b3c57c6c89f2c.html
-- SAP ABAP — BAdI implementation class (glossary): https://help.sap.com/doc/abapdocu_752_index_htm/7.52/en-us/abenbadi_implement_class_glosry.htm
-- SAP ABAP — BAdI (Glossary): https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html
-- SAP ABAP — Enhancements: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html
-- SAP ABAP — Enhancements Using BAdIs: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html
-- SAP ABAP — enhancement implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html
-- SAP ABAP — BAdI implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html
-- SAP ABAP — BAdI implementation class: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html
-- SAP Community — BCF custom fields: https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — mirror [Community](sources/sap-community/balance-carryforward-custom-fields.md)
-- Mirror ABAP Cloud trong repo: [sources/sap-abap-cloud/](sources/sap-abap-cloud/)
-
----
+- SAP KBA 3588343 preview: https://userapps.support.sap.com/sap/support/knowledge/en/3588343 — dùng để xác minh triệu chứng ACDOCA extended items blank sau BCF và keyword `BADI_FINS_ACDOC_FIELDCAT` / `CHANGE_ACTIVE_FIELDS_BCF_OI`; mirror [KBA-3588343](sources/sap-kba/KBA-3588343.md).
+- SAP Help — Balance Carryforward in G/L Accounting: https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/651d8af3ea974ad1a4d74449122c620e/9691b2a7afdf4b7ab15b3c57c6c89f2c.html — dùng để xác minh BAdI `BADI_FINS_ACDOC_FIELDCAT`, enhancement spot `ES_FINS_ACDOCA`, field catalog cho BCF, và cách chạy/schedule BCF.
+- SAP Help — Carry Forward Balances app: https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE_UPA/e55549ee96814207af9232a7688dd64a/65810e56a686fb37e10000000a44147b.html?version=2022.3_UPA — dùng để xác minh app liên quan, `FAGLGVTR`, và lưu ý deprecated theo release.
+- SAP ABAP — BAdI glossary: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html — dùng để xác minh BAdI gồm interface, filter và setting.
+- SAP ABAP — ABAP Enhancements: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html — dùng để xác minh BAdI cho phép enhance ABAP source mà không modify source gốc.
+- SAP ABAP — Enhancements Using BAdIs: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html — dùng để xác minh enhancement spot, implementation class, `GET BADI`, `CALL BADI`, single/multiple use và fallback class.
+- SAP ABAP — enhancement implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html — dùng để xác minh object quản trị enhancement implementation.
+- SAP ABAP — BAdI implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html — dùng để xác minh implementation class, filter condition, active/inactive.
+- SAP ABAP — BAdI implementation class: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html — dùng để xác minh implementation class implement BAdI interface và instance hoạt động như object plug-in.
+- SAP ABAP — GET BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html — dùng để xác minh exception `CX_BADI_NOT_IMPLEMENTED` và `CX_BADI_MULTIPLY_IMPLEMENTED`.
+- SAP ABAP — CALL BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html — dùng để xác minh cách runtime gọi BAdI methods.
+- SAP Community — BCF custom fields: https://community.sap.com/t5/financial-management-q-a/balance-carryforward-s-4-public-cloud/qaq-p/14252529 — nguồn cộng đồng, chỉ dùng tham khảo hạn chế Public Cloud; mirror [Community](sources/sap-community/balance-carryforward-custom-fields.md).
+- Mirror ABAP Cloud trong repo: [sources/sap-abap-cloud/](sources/sap-abap-cloud/) — dùng để đọc bản mirror nội bộ của ABAP Keyword Documentation.
 
 ## Phụ lục kỹ thuật
 
 *Phần dưới dành cho đội kỹ thuật SAP/ABAP khi cần tạo implementation, kiểm tra, rollback hoặc xử lý lỗi. Object mẫu (`ZEI_FINS_ACDOCA`, `ZBI_FINS_ACDOC_FCAT`, `ZCL_IM_FINS_ACDOC_FCAT`) mang tính minh họa — xác nhận trên hệ **DEV** trước khi transport.*
 
-### Điều kiện trước khi làm
+### Điều kiện kỹ thuật trước khi làm
 
 - User có quyền `SE19`, `SE24`, `SE80`/`SE84` trên **DEV** (hoặc sandbox).
 - Đã có technical name field trên `ACDOCA`; đã xem `FINSC_ACDOC_FCT` nếu field chưa BCF-relevant.
@@ -132,11 +173,13 @@ Checklist kỹ thuật chi tiết: [Phụ lục — Kiểm tra sau thao tác](#k
 
 Trên `SE19`: tạo **enhancement implementation** (container `ZEI_*`), **BAdI implementation** (`ZBI_*`) và **implementation class** (`ZCL_*`). Code ABAP viết trong class `ZCL_IM_*`; interface `IF_BADI_*` chỉ khai báo method.
 
-Nguồn: [BAdI glossary](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html), [BAdI implementation class](https://help.sap.com/doc/abapdocu_752_index_htm/7.52/en-us/abenbadi_implement_class_glosry.htm).
+Nguồn: [BAdI glossary](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html), [BAdI implementation class](https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html).
 
 ### Quan hệ object trong BAdI
 
 Áp vào case `BADI_FINS_ACDOC_FIELDCAT`:
+
+> Cần xác minh: các method `CHANGE_ACTIVE_FIELDS_BCF_BS` / `_PL` / `_OI` phải được kiểm tra lại trong `SE24` trên release của hệ thống. Nguồn công khai SAP KBA preview nêu rõ `_OI`; các method còn lại phụ thuộc interface thực tế.
 
 ```text
 SAP Standard
@@ -178,25 +221,25 @@ Customer Z*
 5. Tạo hoặc để SAP sinh Implementation Class (ví dụ `ZCL_IM_FINS_ACDOC_FCAT`).
 6. Code trong class `ZCL_IM_FINS_ACDOC_FCAT`, không code trong interface.
 
-**Method thường dùng:**
+**Method cần kiểm tra trên `SE24`:**
 
 | Loại | Method |
 |------|--------|
-| Open item managed | `CHANGE_ACTIVE_FIELDS_BCF_OI` |
-| Balance Sheet | `CHANGE_ACTIVE_FIELDS_BCF_BS` |
-| P&L | `CHANGE_ACTIVE_FIELDS_BCF_PL` |
+| Open item managed | `CHANGE_ACTIVE_FIELDS_BCF_OI` — xuất hiện trong keyword của KBA 3588343 preview |
+| Balance Sheet | `CHANGE_ACTIVE_FIELDS_BCF_BS` — cần xác minh trong `SE24` |
+| P&L | `CHANGE_ACTIVE_FIELDS_BCF_PL` — cần xác minh trong `SE24` |
 
 **Kiểm tra sau khi tạo:**
 
 1. `SE19` → mở `ZBI_FINS_ACDOC_FCAT` → trạng thái **Active**.
 2. `SE24` → `ZCL_IM_FINS_ACDOC_FCAT` → method `CHANGE_ACTIVE_FIELDS_BCF_*` đã activate.
-3. Chạy thử `FAGLGVTR` (hoặc app BCF) — field custom có trong active fields (sau khi đã cấu hình `FINSC_ACDOC_FCT`).
+3. Chạy thử `FAGLGVTR` hoặc job/app BCF theo release — field custom có trong active fields sau khi đã kiểm tra DDIC/customizing liên quan.
 
 ### Phụ lục kỹ thuật: ví dụ implementation
 
-> **Cảnh báo:** Code bên dưới chỉ là ví dụ. Tên field, method và parameter cần được kiểm tra trực tiếp trên hệ thống SAP thực tế (`SE24` → signature method) trước khi triển khai.
+> **Cảnh báo:** Code bên dưới chỉ minh họa pattern. Chỉ dùng nếu `SE24` xác nhận method, CHANGING parameter và cấu trúc table đúng như ví dụ. Nếu signature khác, sửa theo hệ thực tế.
 
-Thay `ZZBRANCH` bằng technical field name thật trong `ACDOCA`.
+Ví dụ dưới đây giả định CHANGING parameter tên `ct_active_fields` và có component `fieldname`. Thay `ZZBRANCH` bằng technical field name thật trong `ACDOCA`.
 
 ```abap
 METHOD if_badi_fins_acdoc_fieldcat~change_active_fields_bcf_oi.
@@ -218,7 +261,7 @@ Dùng khi tắt ảnh hưởng runtime nhưng vẫn giữ object để sửa ti�
 
 1. `SE19` → mở `ZEI_FINS_ACDOCA` → Change mode.
 2. Deactivate `ZBI_FINS_ACDOC_FCAT` (hoặc tắt active flag).
-3. Save, Activate, test lại BCF (`FAGLGVTR` hoặc app **Carry Forward Balances**).
+3. Save, Activate, test lại BCF bằng `FAGLGVTR` hoặc job/app tương ứng theo release.
 
 Ưu tiên **inactive** implementation trong `SE19` thay vì chỉ comment code (BAdI vẫn được gọi nếu chỉ comment logic).
 
@@ -250,7 +293,7 @@ Kiểm tra còn sót: `SE19`, `SE80` (Enhancements), `SE84` (BAdI Implementation
 - [ ] Có BAdI Implementation: `ZBI_*`
 - [ ] Có Implementation Class: `ZCL_*`
 - [ ] Code nằm trong class, không nằm trong interface
-- [ ] Đúng method: `BCF_OI`, `BCF_BS`, hoặc `BCF_PL`
+- [ ] Đúng method trên `SE24`: `BCF_OI`, `BCF_BS`, hoặc `BCF_PL` nếu interface của hệ có các method này
 
 **Disable / xóa**
 
@@ -272,11 +315,11 @@ Dành khi cần tìm BAdI khác ngoài case ACDOCA/BCF:
 
 Case `BADI_FINS_ACDOC_FIELDCAT`: tìm nhanh qua `SE19` (`ES_FINS_ACDOCA`), `SE24` (`IF_BADI_FINS_ACDOC_FIELDCAT`), where-used, keyword `ACDOC` / `BCF` / `FINS` trên `SE84`.
 
-### Lỗi thường gặp
+### Lỗi thường gặp trong phụ lục kỹ thuật
 
 | Triệu chứng | Nguyên nhân thường gặp | Hướng xử lý |
 |-------------|------------------------|-------------|
-| Custom field ACDOCA **trống sau BCF** | Field chưa BCF-relevant; thiếu catalog / chưa append qua BAdI | `FINSC_ACDOC_FCT`; implement `CHANGE_ACTIVE_FIELDS_BCF_*` — [KBA 3588343](sources/sap-kba/KBA-3588343.md) |
+| Custom field ACDOCA **trống sau BCF** | Field chưa BCF-relevant; thiếu catalog / chưa append qua BAdI | Kiểm tra DDIC/customizing liên quan, sau đó implement method BCF đúng signature — [KBA 3588343](sources/sap-kba/KBA-3588343.md) |
 | Breakpoint **không dừng** | Debug nhầm interface; user/job khác; chưa active implementation | Debug class `ZCL_*`; external breakpoint; SM37 + `JDBG` |
 | `CX_BADI_NOT_IMPLEMENTED` | Single-use BAdI, không có implementation active | Tạo/activate `ZBI_*` — [GET BADI](sources/sap-abap-cloud/3008-ABAPGET_BADI.md) |
 | `CX_BADI_MULTIPLY_IMPLEMENTED` | Single-use nhưng nhiều implementation active | Chỉ một implementation active hoặc kiểm tra filter |
@@ -285,7 +328,7 @@ Case `BADI_FINS_ACDOC_FIELDCAT`: tìm nhanh qua `SE19` (`ES_FINS_ACDOCA`), `SE24
 
 ### Lưu ý triển khai (kỹ thuật)
 
-- Luôn xác nhận method đúng: `BCF_OI`, `BCF_BS`, `BCF_PL`.
+- Luôn xác nhận method đúng trên `SE24`: `BCF_OI`, `BCF_BS`, `BCF_PL` nếu interface của hệ có các method này.
 - Không giả định tên parameter — kiểm tra trên `SE24`.
 - **Activate** enhancement + BAdI implementation + class sau mỗi thay đổi.
 - Object/method phụ thuộc release Finance — xác nhận trong `SE19`/`SE24` trên hệ bạn trước transport QA/PRD.

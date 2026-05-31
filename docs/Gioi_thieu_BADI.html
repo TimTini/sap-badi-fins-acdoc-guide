@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Giới thiệu BAdI — đọc trước khi triển khai</title>
+  <link rel="stylesheet" href="theme.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      nav.toc { position: static; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+    nav.toc {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 20px 16px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+    nav.toc h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+    nav.toc a {
+      display: block;
+      padding: 6px 10px;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    nav.toc a:hover { background: var(--accent-soft); color: var(--accent); }
+    nav.toc a.sub { padding-left: 22px; font-size: 13px; color: var(--muted); }
+    main {
+      padding: 28px 32px 48px;
+    }
+    header.hero {
+      background: linear-gradient(135deg, var(--hero-from) 0%, var(--hero-to) 100%);
+      color: #fff;
+      padding: 28px 32px;
+      border-radius: var(--radius);
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+    header.hero h1 { margin: 0 0 8px; font-size: 1.65rem; font-weight: 600; }
+    header.hero p { margin: 0; opacity: 0.92; font-size: 15px; }
+    header.hero .tags { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+    header.hero .tag {
+      background: rgba(255,255,255,0.2);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    section h2 {
+      margin: 0 0 16px;
+      font-size: 1.35rem;
+      color: var(--accent);
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent-soft);
+    }
+    section h3 {
+      margin: 20px 0 10px;
+      font-size: 1.05rem;
+    }
+    section h4 { margin: 16px 0 8px; font-size: 0.95rem; color: var(--muted); }
+    p { margin: 0 0 12px; }
+    .ref {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      vertical-align: super;
+    }
+    .ref:hover { text-decoration: underline; }
+    pre, .pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 14px 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: Consolas, "Cascadia Code", monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      margin: 12px 0;
+    }
+    pre.abap .kw { color: #7dd3fc; }
+    pre.abap .cm { color: #94a3b8; }
+    code.inline {
+      background: var(--inline-code-bg);
+      color: var(--inline-code-text);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: Consolas, monospace;
+    }
+    .tree {
+      background: var(--tree-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 12px 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--accent-soft); font-weight: 600; }
+    tr:nth-child(even) td { background: var(--row-alt); }
+    ol.steps { padding-left: 1.25rem; margin: 0; }
+    ol.steps li { margin-bottom: 10px; }
+    ol.steps li ul { margin-top: 6px; padding-left: 1.2rem; list-style: disc; }
+    .alert {
+      background: var(--warn-bg);
+      border-left: 4px solid var(--warn-border);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    .checklist { list-style: none; padding: 0; margin: 0; }
+    .checklist li {
+      padding: 8px 0 8px 28px;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+    .refs dl { margin: 0; }
+    .refs dt { font-weight: 600; margin-top: 14px; }
+    .refs dd { margin: 4px 0 0; }
+    .refs a { color: var(--accent); word-break: break-all; }
+    footer.note {
+      font-size: 14px;
+      color: var(--muted);
+      border-top: 1px dashed var(--border);
+      padding-top: 16px;
+      margin-top: 8px;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav class="toc" aria-label="Mục lục"><h2>Mục lục</h2><a href="Huong_dan_BADI_FINS_ACDOC.html">Tiếp theo: case ACDOCA / BCF</a><a href="#muc-dich">Mục đích</a><a href="#noi-dung-chinh">Nội dung chính</a><a href="#doc-nhanh-cho-nguoi-moi" class="sub">Đọc nhanh cho người mới</a><a href="#trong-case-nhom-can-tao-gi" class="sub">Trong case nhóm cần tạo gì?</a><a href="#badi-la-gi" class="sub">BAdI là gì?</a><a href="#badi-trong-enhancement-framework" class="sub">BAdI trong Enhancement Framework</a><a href="#cac-object-can-phan-biet" class="sub">Các object cần phân biệt</a><a href="#runtime-get-badi-va-call-badi" class="sub">Runtime: `GET BADI` và `CALL BADI`</a><a href="#pham-vi-tao-gi-tren-he-customer" class="sub">Phạm vi: tạo gì trên hệ customer?</a><a href="#tao-badi-implementation-don-gian-new-badi" class="sub">Tạo BAdI implementation đơn giản (New BAdI)</a><a href="#cach-a-se19-sap-help-create-a-badi-implementation" class="sub">Cách A — `SE19` (SAP Help: Create a BAdI implementation)</a><a href="#cach-b-se80-sap-help-create-a-container-for-the-implementation" class="sub">Cách B — `SE80` (SAP Help: Create a Container for the Implementation)</a><a href="#minh-hoa-ten-object-case-nhom-xac-nhan-tren-dev" class="sub">Minh họa tên object (case nhóm — xác nhận trên DEV)</a><a href="#loi-runtime-thuong-gap-khi-moi-hoc-sap-help" class="sub">Lỗi runtime thường gặp khi mới học (SAP Help)</a><a href="#luong-tao-badi-implementation-tom-tat-khai-niem" class="sub">Luồng tạo BAdI implementation (tóm tắt khái niệm)</a><a href="#kiem-tra-cach-xac-minh">Kiểm tra / Cách xác minh</a><a href="#link-nguon">Link nguồn</a><a href="sources/README.md">Mirror nguồn SAP</a><a href="Gioi_thieu_BADI.md">Bản Markdown</a></nav>
+    <main>
+      <header class="hero">
+        <h1>Giới thiệu BAdI — đọc trước khi triển khai</h1>
+        <p>Khái niệm BAdI, các object Enhancement Framework, và hướng dẫn tạo BAdI implementation (SE19/SE80) — tóm tắt từ SAP Help.</p>
+        <div class="tags">
+          <span class="tag">Enhancement Framework</span>
+          <span class="tag">BAdI</span>
+          <span class="tag">Đọc trước</span>
+        </div>
+      </header>
+      <section id="muc-dich">
+<h2>Mục đích</h2>
+<p>Tài liệu này giúp thành viên nhóm hiểu <strong>BAdI (Business Add-In)</strong> và các <strong>object liên quan</strong> trong ABAP Enhancement Framework <strong>trước</strong> khi implement BAdI nghiệp vụ (ví dụ <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code> cho Balance Carryforward).</p><p>Nếu chưa biết BAdI, nắm trước 3 ý:</p><ol class="steps"><li>BAdI là điểm móc SAP chừa sẵn để customer thêm logic mà <strong>không sửa source SAP standard</strong>.</li><li>Trong case <code class="inline">ACDOCA</code> / Balance Carryforward, SAP đã có sẵn BAdI <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code>.</li><li>Người triển khai chỉ tạo object customer <code class="inline">Z*</code>: enhancement implementation, BAdI implementation và implementation class.</li></ol><p>Nội dung dưới đây tóm tắt từ <strong>SAP ABAP Keyword Documentation (Cloud)</strong> và <strong>SAP Library — Enhancement Framework</strong> (link đầy đủ ở cuối). Phần thao tác <code class="inline">SE19</code> / <code class="inline">SE80</code> lấy từ SAP Help Portal; nếu màn hình trên hệ DEV khác tài liệu, ưu tiên kiểm tra lại trên release thực tế.</p><p>Sau khi đọc xong, chuyển sang <a href="Huong_dan_BADI_FINS_ACDOC.md">Tài liệu case ACDOCA / BCF</a>.</p></section>
+<section id="noi-dung-chinh">
+<h2>Nội dung chính</h2>
+<h3 id="doc-nhanh-cho-nguoi-moi">Đọc nhanh cho người mới</h3><p>Nếu chỉ cần hiểu để làm case nhóm, đọc theo thứ tự này:</p><ol class="steps"><li><strong>BAdI definition</strong> là thiết kế SAP cung cấp sẵn, ví dụ <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code>.</li><li><strong>BAdI interface</strong> chỉ khai báo method, ví dụ <code class="inline">IF_BADI_FINS_ACDOC_FIELDCAT</code>; không viết logic ở đây.</li><li><strong>BAdI implementation class</strong> là nơi viết ABAP code, ví dụ <code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code>.</li><li><strong>Enhancement implementation</strong> là container quản trị object customer <code class="inline">Z*</code>.</li><li>Runtime SAP gọi BAdI qua <code class="inline">GET BADI</code> / <code class="inline">CALL BADI</code>; filter và trạng thái active/inactive quyết định implementation nào tham gia.</li></ol><h3 id="trong-case-nhom-can-tao-gi">Trong case nhóm cần tạo gì?</h3><p>Với <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code>, nhóm <strong>không tạo BAdI definition mới</strong> và <strong>không sửa interface SAP</strong>. Nhóm chỉ tạo object customer:</p><table><thead><tr><th>Object cần tạo</th><th>Ví dụ</th><th>Kiểm tra ở đâu</th></tr></thead><tbody><tr><td>Enhancement implementation</td><td><code class="inline">ZEI_FINS_ACDOCA</code></td><td><code class="inline">SE19</code> hoặc <code class="inline">SE80</code></td></tr><tr><td>BAdI implementation</td><td><code class="inline">ZBI_FINS_ACDOC_FCAT</code></td><td><code class="inline">SE19</code></td></tr><tr><td>BAdI implementation class</td><td><code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code></td><td><code class="inline">SE24</code> / Class Builder</td></tr></tbody></table><p>Trước khi transport, phải activate đủ class, BAdI implementation và enhancement implementation trên hệ <strong>DEV</strong>.</p><h3 id="badi-la-gi">BAdI là gì?</h3><p>ABAP Glossary định nghĩa <strong>BAdI</strong> (Business Add-In) là <strong>template cho BAdI objects</strong>. Một BAdI gồm:</p><ul><li><strong>BAdI interface</strong> — khai báo method.</li><li><strong>Bộ filter</strong> — chọn implementation khi runtime gọi.</li><li><strong>Các setting</strong> — ví dụ single/multiple use, fallback class, context-free/dependent (chi tiết trong tài liệu <em>Enhancements Using BAdIs</em>).</li></ul><p>BAdI là cơ sở để gọi <strong>BAdI methods</strong> trên <strong>object plug-in</strong> trong chương trình ABAP; caller có thể điều khiển implementation nào được dùng bằng <strong>filter values</strong>.</p><p>Nguồn: <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html">ABENBADI_GLOSRY</a> — mirror <a href="sources/sap-abap-cloud/3987-ABENBADI_GLOSRY.md">3987-ABENBADI_GLOSRY.md</a>.</p><h3 id="badi-trong-enhancement-framework">BAdI trong Enhancement Framework</h3><p>Các trang <em>ABAP - Enhancements</em> và <em>Enhancements Using BAdIs</em> mô tả:</p><ul><li>ABAP source code có thể được <strong>enhance mà không sửa</strong> (modify) source gốc, thông qua BAdI — một phần của <strong>ABAP Enhancement Framework</strong>.</li><li>BAdI cùng <strong>vị trí gọi</strong> trong chương trình ABAP tạo thành <strong>explicit enhancement options</strong> và được gán vào <strong>enhancement spots</strong>.</li><li>Khi BAdI và điểm gọi đã được định nghĩa trên hệ thống, trên <strong>hệ follow-on</strong> (ví dụ customer system) có thể tạo <strong>BAdI implementations</strong> để bổ sung logic.</li><li>BAdI implementation <strong>chủ yếu</strong> gồm <strong>BAdI implementation class</strong>; instance của class hoạt động như <strong>object plug-in</strong> tại runtime.</li><li>Trong Enhancement Framework, BAdI implementation là <strong>enhancement implementation element</strong> và được <strong>enhancement implementations</strong> quản trị.</li></ul><p>Nguồn: <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html">ABENENHANCEMENT_FRAMEWORK</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html">ABENBADI_ENHANCEMENT</a> — mirror <a href="sources/sap-abap-cloud/3006-ABENENHANCEMENT_FRAMEWORK.md">3006-ABENENHANCEMENT_FRAMEWORK.md</a>, <a href="sources/sap-abap-cloud/3007-ABENBADI_ENHANCEMENT.md">3007-ABENBADI_ENHANCEMENT.md</a>.</p><h3 id="cac-object-can-phan-biet">Các object cần phân biệt</h3><p>Bảng dưới map <strong>tên object SAP</strong> → <strong>vai trò</strong>; nguồn là glossary và trang <em>Enhancements Using BAdIs</em>. Tên <code class="inline">Z*</code> trong cột ví dụ chỉ minh họa object customer — quy ước đặt tên phụ thuộc dự án.</p><table><thead><tr><th>Object (SAP)</th><th>Vai trò</th><th>Ví dụ minh họa (case Finance)</th></tr></thead><tbody><tr><td><strong>enhancement spot</strong></td><td>Repository object quản trị <strong>explicit enhancement options</strong></td><td><code class="inline">ES_FINS_ACDOCA</code></td></tr><tr><td><strong>BAdI</strong> (BAdI definition)</td><td>Template: interface + filters + settings</td><td><code class="inline">BADI_FINS_ACDOC_FIELDCAT</code></td></tr><tr><td><strong>BAdI interface</strong></td><td>Khai báo <strong>BAdI methods</strong></td><td><code class="inline">IF_BADI_FINS_ACDOC_FIELDCAT</code></td></tr><tr><td><strong>enhancement implementation</strong></td><td>Repository object quản trị enhancements của object khác</td><td><code class="inline">ZEI_*</code></td></tr><tr><td><strong>BAdI implementation</strong></td><td>Implementation của một BAdI; gồm class + filter condition; trạng thái <strong>active/inactive</strong></td><td><code class="inline">ZBI_*</code></td></tr><tr><td><strong>BAdI implementation class</strong></td><td>Global class implement interface; <strong>nơi viết code</strong>; instance = object plug-in</td><td><code class="inline">ZCL_IM_*</code></td></tr></tbody></table><p><strong>Quan hệ phân cấp (tóm tắt):</strong></p><div class="tree">SAP standard (định nghĩa enhancement)
+└── enhancement spot
+    └── BAdI definition
+        └── BAdI interface (+ filters, settings)
+
+Customer (tạo trên hệ follow-on)
+└── enhancement implementation
+    └── BAdI implementation
+        ├── BAdI implementation class   ← code ABAP
+        └── filter condition              ← chọn khi GET BADI</div><p>Nguồn object: <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_SPOT_GLOSRY.html">ABENENHANCEMENT_SPOT_GLOSRY</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html">ABENENHANCEMENT_IMPL_GLOSRY</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html">ABENBADI_IMPLEMENTATION_GLOSRY</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html">ABENBADI_IMPLEMENT_CLASS_GLOSRY</a>.</p><p><strong>Lưu ý khi đọc code:</strong> interface chỉ <strong>khai báo</strong> method; logic viết trong <strong>implementation class</strong> (SAP Help: <em>Enhancements Using BAdIs</em>, <em>BAdI implementation class</em>).</p><h3 id="runtime-get-badi-va-call-badi">Runtime: `GET BADI` và `CALL BADI`</h3><p>Trang <em>Enhancements Using BAdIs</em> nêu hai câu lệnh runtime:</p><table><thead><tr><th>Câu lệnh</th><th>Mục đích (SAP)</th></tr></thead><tbody><tr><td><code class="inline">GET BADI</code></td><td>Tạo BAdI object — handle cho object plug-ins</td></tr><tr><td><code class="inline">CALL BADI</code></td><td>Gọi BAdI methods trên object plug-ins</td></tr></tbody></table><p>Filter trên BAdI implementation dùng để chọn implementation phù hợp trong <code class="inline">GET BADI</code>. Trạng thái <strong>inactive</strong> của BAdI implementation ghi đè cả Switch Framework và filter condition.</p><p>Nguồn: <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html">ABENBADI_ENHANCEMENT</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html">ABENBADI_IMPLEMENTATION_GLOSRY</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html">ABAPGET_BADI</a>, <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html">ABAPCALL_BADI</a>.</p><h3 id="pham-vi-tao-gi-tren-he-customer">Phạm vi: tạo gì trên hệ customer?</h3><p>Trên dự án nhóm (Balance Carryforward / <code class="inline">ACDOCA</code>), <strong>SAP đã cung cấp sẵn</strong> enhancement spot, BAdI definition và interface. Customer <strong>không</strong> tạo BAdI definition mới, mà tạo <strong>BAdI implementation</strong> (container + class + activate).</p><p>Tạo <strong>BAdI definition</strong> từ đầu (enhancement spot + BAdI mới) là bước <strong>định nghĩa enhancement</strong> — dành cho người thiết kế extension spot, khác với implement BAdI SAP có sẵn. SAP mô tả tại <a href="https://help.sap.com/doc/saphelp_ewm900/9.0/en-US/32/a83942424dac04e10000000a1550b0/content.htm">Creating a BAdI (Enhancement Framework)</a>. Tài liệu này tập trung <strong>implement BAdI đã có</strong>.</p><h3 id="tao-badi-implementation-don-gian-new-badi">Tạo BAdI implementation đơn giản (New BAdI)</h3><p>SAP Library <em>How to Implement a BAdI</em> và <em>Creating, Editing, and Deleting Enhancement Implementations</em> mô tả luồng tối thiểu gồm <strong>3 lớp object customer</strong>:</p><div class="tree">enhancement implementation (container, gán 1 enhancement spot)
+└── BAdI implementation
+    └── BAdI implementation class   ← implement method của BAdI interface</div><p><strong>Điều kiện:</strong> trên hệ DEV đã biết <strong>tên enhancement spot</strong> (hoặc tên BAdI) do SAP định nghĩa — ví dụ nhóm dùng <code class="inline">ES_FINS_ACDOCA</code> / <code class="inline">BADI_FINS_ACDOC_FIELDCAT</code>.</p><h3 id="cach-a-se19-sap-help-create-a-badi-implementation">Cách A — `SE19` (SAP Help: Create a BAdI implementation)</h3><ol class="steps"><li>Mở transaction <strong><code class="inline">SE19</code></strong>.</li><li>Cửa sổ <strong>Create Implementation</strong> → chọn radio <strong><code class="inline">New BAdI</code></strong>.</li><li>Nhập <strong>Enhancement Spot</strong> (hoặc chọn qua Input Help) → bấm <strong><code class="inline">Create Impl</code></strong>.</li><li>Nhập <strong>tên Enhancement Implementation</strong> và <strong>Short Text</strong> → xác nhận.</li><li>Trong cây enhancement implementation, chọn <strong>BAdI</strong> cần implement (nếu spot có nhiều BAdI).</li><li>Tạo / gán <strong>Implementing Class</strong> (BAdI implementation class).</li><li>Trong Class Builder, <strong>implement method</strong> đã khai báo trên <strong>BAdI interface</strong> (SAP Help: method đã có sẵn trên interface — customer chỉ viết body).</li><li><strong>Save</strong> và <strong>Activate</strong> class.</li><li>Trên BAdI implementation, bật <strong>Implementation is active</strong> (Runtime Behavior — SAP Help <em>How to Implement a BAdI</em>: khi active, runtime gọi implementation thay vì fallback class nếu có).</li><li><strong>Save</strong> và <strong>Activate</strong> enhancement implementation; transport theo quy trình nội bộ.</li></ol><p>Nguồn thao tác SE19: <a href="https://help.sap.com/doc/saphelp_scm700_ehp02/7.0.2/en-US/5f/103a4280da9923e10000000a155106/content.htm">Creating, Editing, and Deleting Enhancement Implementations</a>.</p><h3 id="cach-b-se80-sap-help-create-a-container-for-the-implementation">Cách B — `SE80` (SAP Help: Create a Container for the Implementation)</h3><ol class="steps"><li>Mở <strong>Object Navigator</strong> — transaction <strong><code class="inline">SE80</code></strong>.</li><li>Mở <strong>enhancement spot</strong> tương ứng.</li><li>Chọn <strong><code class="inline">Create Enhancement Implementation</code></strong> → tạo <strong>(simple) enhancement implementation</strong> (container gán duy nhất một spot — SAP Help).</li><li>Trong container, tạo <strong>BAdI implementation</strong> cho BAdI definition trong spot.</li><li>Nhập <strong>Implementing Class</strong> → <strong><code class="inline">Change</code></strong> → Class Builder → implement method → save/activate class.</li><li>Đánh dấu implementation <strong>active</strong>, save/activate enhancement implementation.</li></ol><p>Nguồn: <a href="https://help.sap.com/saphelp_snc70/helpdata/en/44/f518d884056c30e10000000a114a6b/content.htm">How to Implement a BAdI</a>.</p><h3 id="minh-hoa-ten-object-case-nhom-xac-nhan-tren-dev">Minh họa tên object (case nhóm — xác nhận trên DEV)</h3><table><thead><tr><th>Bước SAP Help</th><th>Object customer (ví dụ nhóm)</th></tr></thead><tbody><tr><td>enhancement implementation</td><td><code class="inline">ZEI_FINS_ACDOCA</code></td></tr><tr><td>BAdI implementation</td><td><code class="inline">ZBI_FINS_ACDOC_FCAT</code></td></tr><tr><td>BAdI implementation class</td><td><code class="inline">ZCL_IM_FINS_ACDOC_FCAT</code></td></tr><tr><td>BAdI interface (SAP, không sửa)</td><td><code class="inline">IF_BADI_FINS_ACDOC_FIELDCAT</code></td></tr></tbody></table><p>Code mẫu cho method BCF nằm ở <a href="Huong_dan_BADI_FINS_ACDOC.md#phu-luc-ky-thuat">Phụ lục kỹ thuật tài liệu case</a>.</p><h3 id="loi-runtime-thuong-gap-khi-moi-hoc-sap-help">Lỗi runtime thường gặp khi mới học (SAP Help)</h3><table><thead><tr><th>Tình huống</th><th>SAP mô tả</th></tr></thead><tbody><tr><td>BAdI <strong>single use</strong>, nhiều implementation <strong>active</strong></td><td>Exception <code class="inline">CX_BADI_MULTIPLY_IMPLEMENTED</code> (<em>How to Implement a BAdI</em>)</td></tr><tr><td>BAdI <strong>single use</strong>, không có implementation active</td><td><code class="inline">CX_BADI_NOT_IMPLEMENTED</code> — nên có fallback class (<em>Enhancements Using BAdIs</em>, <em>GET BADI</em>)</td></tr><tr><td>Implementation <strong>inactive</strong></td><td>Không tham gia runtime; ghi đè filter và Switch Framework (<em>BAdI implementation</em> glossary)</td></tr></tbody></table><h3 id="luong-tao-badi-implementation-tom-tat-khai-niem">Luồng tạo BAdI implementation (tóm tắt khái niệm)</h3><p>Trang <em>Enhancements Using BAdIs</em> mô tả luồng khái niệm trùng với các bước thao tác trên:</p><ol class="steps"><li>SAP đã định nghĩa <strong>BAdI</strong> và <strong>điểm gọi</strong> trong chương trình ABAP (explicit enhancement option trong <strong>enhancement spot</strong>).</li><li>Trên hệ customer, tạo <strong>enhancement implementation</strong> (container).</li><li>Trong container, tạo <strong>BAdI implementation</strong> gắn BAdI definition.</li><li>Implement method trên <strong>BAdI implementation class</strong>.</li><li><strong>Activate</strong> implementation và class.</li><li>Transport object customer DEV → QA → PRD.</li></ol><p>Nguồn khái niệm: <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html">ABENBADI_ENHANCEMENT</a>.</p></section>
+<section id="kiem-tra-cach-xac-minh">
+<h2>Kiểm tra / Cách xác minh</h2>
+<p>Trước khi sang tài liệu implement case ACDOCA, mỗi thành viên tự trả lời:</p><ol class="steps"><li><strong>BAdI khác gì sửa trực tiếp SAP standard?</strong> → Enhance qua implementation customer, không modify source SAP — xem <em>ABAP - Enhancements</em>.</li><li><strong>Code viết ở đâu?</strong> → <strong>BAdI implementation class</strong>, không phải interface.</li><li><strong>Object nào quản trị BAdI implementation?</strong> → <strong>enhancement implementation</strong>.</li><li><strong>Làm sao runtime chọn implementation?</strong> → Filter trong <code class="inline">GET BADI</code>; trạng thái active/inactive — xem <em>BAdI implementation</em> glossary.</li><li><strong>Đã mở mirror/glossary tương ứng trên SAP Help?</strong> → Ít nhất <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html">BAdI</a> và <a href="https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html">Enhancements Using BAdIs</a>.</li></ol><p><strong>Thực hành trên DEV (đối chiếu với SAP Help):</strong></p><ol class="steps"><li>Tạo được enhancement implementation + BAdI implementation qua <strong><code class="inline">SE19</code></strong> (New BAdI) hoặc <strong><code class="inline">SE80</code></strong>.</li><li>Class implement method trên interface; <strong>activate</strong> class và implementation.</li><li>Trạng thái BAdI implementation là <strong>active</strong> (inactive → runtime không gọi — glossary <em>BAdI implementation</em>).</li></ol><p>Nếu còn mơ hồ về object tree, đọc lại mục <strong>Các object cần phân biệt</strong> hoặc wiki <a href="wiki/Enhancements-Using-BAdIs.md">Enhancements Using BAdIs</a>.</p></section>
+<section id="link-nguon" class="refs">
+<h2>Link nguồn</h2>
+<ul><li>SAP ABAP Glossary — BAdI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_GLOSRY.html — dùng để xác minh BAdI gồm interface, filter và setting.</li><li>SAP ABAP — ABAP Enhancements: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_FRAMEWORK.html — dùng để xác minh ABAP source có thể được enhance bằng BAdI mà không sửa source gốc.</li><li>SAP ABAP — Enhancements Using BAdIs: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_ENHANCEMENT.html — dùng để xác minh BAdI nằm trong Enhancement Framework, được gán vào enhancement spot, và implementation class hoạt động như object plug-in.</li><li>SAP ABAP Glossary — enhancement spot: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_SPOT_GLOSRY.html — dùng để xác minh vai trò enhancement spot.</li><li>SAP ABAP Glossary — enhancement implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENENHANCEMENT_IMPL_GLOSRY.html — dùng để xác minh vai trò enhancement implementation.</li><li>SAP ABAP Glossary — BAdI implementation: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENTATION_GLOSRY.html — dùng để xác minh implementation gồm class, filter condition, active/inactive.</li><li>SAP ABAP Glossary — BAdI implementation class: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABENBADI_IMPLEMENT_CLASS_GLOSRY.html — dùng để xác minh class implement BAdI interface và instance là object plug-in.</li><li>SAP ABAP — GET BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPGET_BADI.html — dùng để xác minh <code class="inline">GET BADI</code> tạo BAdI object và xử lý filter.</li><li>SAP ABAP — CALL BADI: https://help.sap.com/doc/abapdocu_cp_index_htm/CLOUD/en-US/ABAPCALL_BADI.html — dùng để xác minh <code class="inline">CALL BADI</code> gọi BAdI method trên object plug-ins.</li><li>SAP Library — How to Implement a BAdI: https://help.sap.com/saphelp_snc70/helpdata/en/44/f518d884056c30e10000000a114a6b/content.htm — dùng để xác minh luồng SE80 / implementation class / active flag.</li><li>SAP Library — Creating, Editing, and Deleting Enhancement Implementations: https://help.sap.com/doc/saphelp_scm700_ehp02/7.0.2/en-US/5f/103a4280da9923e10000000a155106/content.htm — dùng để xác minh luồng <code class="inline">SE19</code> → <code class="inline">New BAdI</code> → <code class="inline">Create Impl</code>.</li><li>SAP Library — Creating a BAdI: https://help.sap.com/doc/saphelp_ewm900/9.0/en-US/32/a83942424dac04e10000000a1550b0/content.htm — dùng để phân biệt bước định nghĩa BAdI mới với bước customer implement BAdI có sẵn.</li><li>Mirror offline trong repo: <a href="sources/sap-abap-cloud/">sources/sap-abap-cloud/</a> — dùng để đọc lại bản mirror nội bộ của SAP ABAP Keyword Documentation.</li><li>Tài liệu bước tiếp theo: <a href="Huong_dan_BADI_FINS_ACDOC.md">Huong_dan_BADI_FINS_ACDOC.md</a> — dùng để chuyển sang case <code class="inline">ACDOCA</code> / Balance Carryforward.</li></ul></section>
+
+      <footer class="note" style="padding:16px 0;font-size:14px;color:var(--muted)">
+        <p>Nội dung trích SAP ABAP Keyword Documentation (Cloud). Thao tác transaction: xác minh trên SAP Help Portal theo release hệ thống. Tạo HTML: <code class="inline">node docs/scripts/build-guide-html.mjs</code></p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
